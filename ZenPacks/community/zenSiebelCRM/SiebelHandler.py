@@ -43,8 +43,9 @@ class SiebelHandler():
             self.message = 'WARNING: could not connect to '+self.server
     
     def terminate(self):
-        #self.child.sendline('quit')
-        self.execCommand('quit')
+        self.child.sendline('quit')
+        #print "before",self.child.before
+        #print "after",self.child.after
         self.child.close(force=True)
     
     def getCommandOutput(self,command):

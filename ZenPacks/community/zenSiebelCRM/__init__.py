@@ -15,6 +15,7 @@
 import Globals
 from Products.ZenModel.ZenPack import ZenPack as ZenPackBase
 from Products.ZenUtils.Utils import unused
+import os
 
 unused(Globals)
 
@@ -30,18 +31,23 @@ class ZenPack(ZenPackBase):
         ('zSiebelPassword', 'sadmin', 'password'),
         ]
 
+    def symlinkScript(self):
+        os.system('ln -sf %s/srvrmgr %s/srvrmgr' %
+            ('/siebel/siebsrvr/bin', zenPath('libexec')))
+
+    def removeScriptSymlink(self):
+        os.system('rm -f %s/srvrmgr' % (zenPath('libexec')))
+
+        
     def install(self, dmd):
         ZenPackBase.install(self, dmd)
          # Put your customer installation logic here.
+        self.symlinkScript()
         pass
 
     def remove(self, dmd, leaveObjects=False):
         if not leaveObjects:
-            # When a ZenPack is removed the remove method will be called with
-            # leaveObjects set to False. This means that you likely want to
-            # make sure that leaveObjects is set to false before executing
-            # your custom removal code.
             pass
-
+        self.removeScriptSymlink()
         ZenPackBase.remove(self, dmd, leaveObjects=leaveObjects)
 

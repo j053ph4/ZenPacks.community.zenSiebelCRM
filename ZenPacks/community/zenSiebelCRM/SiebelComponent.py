@@ -34,10 +34,6 @@ class SiebelComponent(DeviceComponent, ManagedEntity):
         ),
     )
 
-    # Defining the "perfConf" action here causes the "Graphs" display to be
-    # available for components of this type.
-    # Defining the "perfConf" action here causes the "Graphs" display to be
-    # available for components of this type.
     factory_type_information = ({
         'actions': ({
             'id': 'perfConf',
@@ -58,37 +54,34 @@ class SiebelComponent(DeviceComponent, ManagedEntity):
     def statusMap(self):
         """ map run state to zenoss status
         """
-        if self.runState == 'Online':
-            self.status = 0
-        elif self.runState == 'Running':
-            self.status = 0
-        elif self.runState == 'Unavailable':
-            self.status = 1
-        elif self.runState == 'Stopped':
-            self.status = 2
-        else:
+        stateValue = self.getStatusValue()
+        if stateValue == -1:
+            self.runState = 'Unknown'
             self.status = -1
+        elif stateValue == 0:
+            self.runState = 'Unavailable'
+            self.status = 2
+        elif stateValue == 1:
+            self.runState = 'Stopped'
+            self.status = 1
+        elif stateValue == 2:
+            self.runState = 'Online'
+            self.status = 0
+        elif stateValue == 3:
+            self.runState = 'Running'
+            self.status = 0
         return self.status
             
     def getStatus(self):
         return self.statusMap()
-        
-        
-    # Custom components must always implement the device method. The method
-    # should return the device object that contains the component.
+
     def device(self):
         return self.siebelDevice()
     
     def monitored(self):
-        if self.runState == 'Online':
-            return True
-        elif self.runState == 'Running':
-            return True
-        elif self.runState == 'Unavailable':
-            return False
-        elif self.runState == 'Stopped':
-            return False
-        else:
-            return False
+        return True
     
-    
+    def getStatusValue(self):
+        """ return numerical value of status check [1|0]
+        """
+        return int(self.cacheRRDValue('get-stats_runState',0))

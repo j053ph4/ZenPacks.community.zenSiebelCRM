@@ -43,10 +43,8 @@ class SiebelHandler():
             self.message = 'WARNING: could not connect to '+self.server
     
     def terminate(self):
-        self.child.sendline('quit')
-        #print "before",self.child.before
-        #print "after",self.child.after
-        self.child.close(force=True)
+        self.child.sendline('exit')
+        self.child.close()
     
     def getCommandOutput(self,command):
         """ execute a command against srvrmgr and 
@@ -63,12 +61,12 @@ class SiebelHandler():
         try:
             self.child.sendline(command)
             self.child.expect(self.prompt, timeout=self.timeout)
-            self.message = 'OK: Query successful on '+self.server
+            #self.message = 'OK: Query successful on '+self.server
             self.status = 0
             return self.child.before
         except:
             self.status = 1
-            self.message = 'WARNING: Query failed on '+self.server
+            #self.message = 'WARNING: Query failed on '+self.server
             return None
         
     def parseOutput(self,data):
@@ -176,7 +174,7 @@ class SiebelData():
     def updateStatus(self):
         """ Update the nagios-style status,message attributes
         """
-        self.message = self.siebel.message
+        #self.message = self.siebel.message
         self.status = self.siebel.status
       
     def checkQuery(self):
@@ -201,16 +199,13 @@ class SiebelData():
     def getTasksForComponent(self,component):
         """ retrieve task status for an individual component
         """
-
         if self.checkQuery() == True:
-            runstate = self.getComponentRunStatus(component)
             numTasks = 0
             goodTasks = 0
             badTasks = 0
             try:
                 command = 'list tasks for component '+component+' show SV_NAME, CC_ALIAS, TK_PID, TK_DISP_RUNSTATE'
                 data = self.siebel.getCommandOutput(command)
-                self.updateStatus()
                 entries = len(data[data.keys()[0]])
                 numTasks = entries
                 for i in range(entries):
@@ -221,7 +216,7 @@ class SiebelData():
                         badTasks += 1
             except:
                 pass
-            self.message += '|'
+            #self.message += '|'
             self.message += 'numTasks='+str(numTasks)
             self.message += ' goodTasks='+str(goodTasks)
             self.message += ' badTasks='+str(badTasks)
@@ -232,10 +227,20 @@ class SiebelData():
         """
         command = 'list component '+component+' show CC_ALIAS,CP_DISP_RUN_STATE,CP_START_TIME,CP_END_TIME'
         if self.checkQuery() == True:
-            self.updateStatus()
             data = self.siebel.getCommandOutput(command)
-            runstate = data['CP_DISP_RUN_STATE'][0]
-            return runstate
+            try:
+                runstate = data['CP_DISP_RUN_STATE'][0]
+                if runstate == 'Online':
+                    self.message += ' runState=2'
+                elif runstate == 'Running':
+                    self.message += ' runState=3'
+                elif runstate == 'Unavailable':
+                    self.message += ' runState=0'
+                elif runstate == 'Stopped':
+                    self.message += ' runState=1'
+            except:
+                self.message += ' runState=-1'
+            return self.message   
         
     def setComponentStatus(self,component):
         """ retrieve and set the run status of all components

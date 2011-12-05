@@ -5,6 +5,21 @@
     xmlns:zcml="http://namespaces.zope.org/zcml">
     
 	<configure zcml:condition="installed Products.Zuul">
+
+	<adapter factory=".info.SiebelPerfDataSourceInfo"
+		for=".datasources.SiebelPerfDataSource.SiebelPerfDataSource"
+		provides=".interfaces.ISiebelPerfDataSourceInfo"
+	/>
+	
+	<adapter factory=".info.SiebelStatusDataSourceInfo"
+		for=".datasources.SiebelStatusDataSource.SiebelStatusDataSource"
+		provides=".interfaces.ISiebelStatusDataSourceInfo"
+	/>
+	
+	<adapter factory=".info.SiebelTasksDataSourceInfo"
+		for=".datasources.SiebelTasksDataSource.SiebelTasksDataSource"
+		provides=".interfaces.ISiebelTasksDataSourceInfo"
+	/>
 	
 	<adapter factory=".info.SiebelComponentInfo"
 		for=".SiebelComponent.SiebelComponent"

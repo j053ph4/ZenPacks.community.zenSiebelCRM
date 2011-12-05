@@ -78,10 +78,16 @@ class SiebelComponent(DeviceComponent, ManagedEntity):
     def device(self):
         return self.siebelDevice()
     
-    def monitored(self):
-        return True
-    
     def getStatusValue(self):
         """ return numerical value of status check [1|0]
         """
-        return int(self.cacheRRDValue('get-stats_runState',0))
+        return int(self.cacheRRDValue('siebelRunStatus_runState',0))
+    
+    def manage_deleteComponent(self, REQUEST=None):
+        url = None
+        if REQUEST is not None:
+            url = self.device().siebelComponents.absolute_url()
+        self.getPrimaryParent()._delObject(self.id)
+        if REQUEST is not None:
+            REQUEST['RESPONSE'].redirect(url)
+

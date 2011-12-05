@@ -24,6 +24,7 @@ ZC.SiebelComponentPanel = Ext.extend(ZC.ComponentGridPanel, {
                 {name: 'severity'},
                 {name: 'status'},
                 {name: 'name'},
+                {name: 'usesMonitorAttribute'},
                 {name: 'CGalias'},
                 {name: 'runState'},
                 {name: 'monitor'},

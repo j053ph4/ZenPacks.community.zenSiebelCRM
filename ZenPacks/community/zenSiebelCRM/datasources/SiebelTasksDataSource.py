@@ -13,8 +13,8 @@ class SiebelTasksDataSource(ZenPackPersistence, RRDDataSource):
     # Set default values for properties inherited from RRDDataSource.
     eventClass = '/Status/Siebel'
     component = "${here/CCalias}"
-
-    command = 'list tasks for component '+component+' show SV_NAME, CC_ALIAS, TK_PID, TK_DISP_RUNSTATE'
+    server = "${dev/zSiebelServer}"
+    command = 'list tasks for component \'${here/CCalias}\' server ${dev/zSiebelServer} show TK_DISP_RUNSTATE'
 
     _properties = RRDDataSource._properties + (
         {'id': 'command', 'type': 'string'},

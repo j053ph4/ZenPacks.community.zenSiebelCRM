@@ -15,12 +15,19 @@ class SiebelConfigService(CollectorConfigService):
     ZenHub service for the zensiebelperf collector daemon.
     """
     def __init__(self, dmd, instance):
+        # attributes that will be available to the daemon
         deviceProxyAttributes = ('zSiebelGateway',
                                  'zSiebelEnterprise',
                                  'zSiebelServer',
                                  'zSiebelUser',
-                                 'zSiebelPassword')
+                                 'zSiebelPassword',
+                                 'zSiebelShareGateway',
+                                 'zSiebelPerfCycleSeconds',
+                                 'zSiebelPerfCyclesPerConnection',
+                                 'zSiebelPerfTimeoutSeconds')
+                                 
         CollectorConfigService.__init__(self, dmd, instance, deviceProxyAttributes)
+        srvrmgrs = []
 
     def _filterDevice(self, device):
         filter = CollectorConfigService._filterDevice(self, device)
@@ -39,30 +46,25 @@ class SiebelConfigService(CollectorConfigService):
         proxy.configCycleInterval = max(device.zSiebelPerfCycleSeconds, 1)
         proxy.cyclesPerConnection = max(device.zSiebelPerfCyclesPerConnection, 2)
         proxy.timeoutSeconds = max(device.zSiebelPerfTimeoutSeconds, 1)
-        
+        proxy.shareGateway = device.zSiebelShareGateway
         proxy.datasources = {}
         proxy.datapoints = []
         proxy.thresholds = []
-
         perfServer = device.getPerformanceServer()
 
-        self._getDataPoints(proxy, device, device.id, None, perfServer)
+        self._getDataPoints(proxy, device, device.id, None, device.zSiebelServer, perfServer)
         proxy.thresholds += device.getThresholdInstances('SiebelPerf')
         proxy.thresholds += device.getThresholdInstances('SiebelTasks')
         proxy.thresholds += device.getThresholdInstances('SiebelStatus')
         
         for component in device.getMonitoredComponents():
-            self._getDataPoints(
-                proxy, component, component.device().id, component.id,
-                perfServer)
-            proxy.thresholds += component.getThresholdInstances(
-                'Siebel')
+            self._getDataPoints(proxy, component, component.device().id, component.id, device.zSiebelServer, perfServer)
+            proxy.thresholds += component.getThresholdInstances('SiebelPerf')
+            proxy.thresholds += component.getThresholdInstances('SiebelTasks')
+            proxy.thresholds += component.getThresholdInstances('SiebelStatus')
         return proxy
 
-
-    def _getDataPoints(
-            self, proxy, deviceOrComponent, deviceId, componentId, perfServer
-            ):
+    def _getDataPoints(self, proxy, deviceOrComponent, deviceId, componentId, seibelServer, perfServer):
         
         for template in deviceOrComponent.getRRDTemplates():
             compId = deviceOrComponent.id
@@ -81,7 +83,7 @@ class SiebelConfigService(CollectorConfigService):
                 dsInfo = {}
                 dsInfo['dsId'] = dsId
                 dsInfo['compId'] = compId
-                dsInfo['command'] = ds.command.replace('${here/CCalias}',compId)
+                dsInfo['command'] = ds.command.replace('${here/CCalias}',compId).replace('${dev/zSiebelServer}',seibelServer)
                 dsInfo['sourcetype'] = sourcetype
                 dsInfo['dpInfo'] = {}
                 for dp in ds.datapoints():

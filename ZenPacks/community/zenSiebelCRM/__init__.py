@@ -8,14 +8,15 @@ unused(Globals)
 
 class ZenPack(ZenPackBase):
     packZProperties = [
-        ('zSiebelGateway', 'default value', 'string'),
-        ('zSiebelEnterprise', 'default value', 'string'),
-        ('zSiebelServer', 'default value', 'string'),
-        ('zSiebelUser', 'SADMIN', 'string'),
-        ('zSiebelPassword', 'sadmin', 'password'),
+        ('zSiebelGateway', 'GATEWAY', 'string'),
+        ('zSiebelEnterprise', 'ENTERPRISE', 'string'),
+        ('zSiebelServer', 'SERVER', 'string'),
+        ('zSiebelUser', 'USER', 'string'),
+        ('zSiebelPassword', 'PASSWORD', 'password'),
         ('zSiebelPerfCycleSeconds', 300, 'int'),
-        ('zSiebelPerfCyclesPerConnection', 5, 'int'),
+        ('zSiebelPerfCyclesPerConnection', 288, 'int'),
         ('zSiebelPerfTimeoutSeconds', 10, 'int'),
+        ('zSiebelShareGateway',True,'boolean')
         ]
 
     def symlinkScript(self):
@@ -25,16 +26,15 @@ class ZenPack(ZenPackBase):
     def removeScriptSymlink(self):
         os.system('rm -f %s/srvrmgr' % (zenPath('libexec')))
 
-        
-    def install(self, dmd):
-        ZenPackBase.install(self, dmd)
+    def install(self, app):
+        ZenPackBase.install(self, app)
          # Put your customer installation logic here.
         self.symlinkScript()
         pass
 
-    def remove(self, dmd, leaveObjects=False):
+    def remove(self, app, leaveObjects=False):
         if not leaveObjects:
             pass
         self.removeScriptSymlink()
-        ZenPackBase.remove(self, dmd, leaveObjects=leaveObjects)
+        ZenPackBase.remove(self, app, leaveObjects)
 

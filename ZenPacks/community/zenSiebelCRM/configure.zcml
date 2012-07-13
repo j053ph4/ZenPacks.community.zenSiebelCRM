@@ -33,6 +33,7 @@
 	
 	<browser:viewlet
 		name="js-zenSiebelCRM"
+		for=".SiebelDevice.SiebelDevice"
 		paths="/++resource++zenSiebelCRM/siebelcomponent.js"
 		weight="10"
 		manager="Products.ZenUI3.browser.interfaces.IJavaScriptSrcManager"

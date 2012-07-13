@@ -55,19 +55,23 @@ class SiebelComponent(DeviceComponent, ManagedEntity):
         """ map run state to zenoss status
         """
         stateValue = self.getStatusValue()
+        
         if stateValue == -1:
             self.runState = 'Unknown'
             self.status = -1
         elif stateValue == 0:
-            self.runState = 'Unavailable'
-            self.status = 2
+            self.runState = 'Shutdown'
+            self.status = 1
         elif stateValue == 1:
-            self.runState = 'Stopped'
+            self.runState = 'Unavailable'
             self.status = 1
         elif stateValue == 2:
+            self.runState = 'Stopped'
+            self.status = 1
+        elif stateValue == 3:
             self.runState = 'Online'
             self.status = 0
-        elif stateValue == 3:
+        elif stateValue == 4:
             self.runState = 'Running'
             self.status = 0
         return self.status

@@ -12,7 +12,9 @@ class SiebelPerfDataSource(ZenPackPersistence, RRDDataSource):
     
     eventClass = '/Status/Siebel'
     component = "${here/CCalias}"
-    command = ''
+    server = "${dev/zSiebelServer}"
+    #command = 'list statistics for component ${here/CCalias} show STAT_ALIAS,SD_DATATYPE,SD_SUBSYSTEM,CURR_VAL'
+    command = 'list statistics for component ${here/CCalias} server ${dev/zSiebelServer} show STAT_ALIAS,CURR_VAL'
 
     _properties = RRDDataSource._properties + (
         {'id': 'command', 'type': 'string'},

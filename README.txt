@@ -2,7 +2,7 @@ Developed by: Joseph Anderson
 Description:
 
 This Zenpack provides modeling and monitoring of the Siebel CRM Application
-Server. 
+Server.
 
     No agent or changes needed on the remote server.
     Tested against Windows, but should support mutliple platforms
@@ -17,7 +17,7 @@ This ZenPack is very heavily inspired by the recently released "Siebel CRM
 Monitoring" Zenpack, and this author owes an enormous debt of gratitude to the
 author of that ZenPack, for sharing his knowledge and expertise.  I can say
 personally that there is a strong need for this capability, and extremely few
-open-source options providing it. 
+open-source options providing it.
 
 Although it was comprehensive, that ZenPack was unsuitable for our environment
 (we have an extensive Siebel deployment).  This ZenPack "repackages" the best
@@ -30,8 +30,6 @@ data, this ZenPack models the remote server and creates components
 corresponding to all available subcomponents.  These subcomponents are then
 modeled and managed as typical device "components" (such as a file system).
 
-Initial Component Template Thresholds have been copied directly from the
-preexisting "Siebel CRM Monitor" ZenPack but are disabled.
 
 Components:
 
@@ -40,8 +38,7 @@ The ZenPack provides the following
     SiebelComponent Template provides:
         Data Sources
             SiebelStatus returns number corresponding to component status
-            SiebelTasks returns the number of total tasks, good tasks, and bad
-tasks
+            SiebelTasks returns the number of total tasks, good tasks, and bad tasks
             SiebelPerf returns performance statistics per component
         Thresholds
             various (Min/Max)
@@ -77,14 +74,12 @@ All are required for the modeler/data source to function.
 A "Siebel" Device class should be added at some level of the Devices
 heirarchy, with the following:
 
-    zPythonClass zProperty should be set to
-ZenPacks.community.zenSiebelCRM.SiebelDevice
     zCollectorPlugins should contain siebelComponentMap in the list of modeler
 plugins
 
 Requirements:
 
-    Zenoss Versions Supported: 3.0
+    Zenoss Versions Supported: 3.x, 4.x
     External Dependencies: see above notes
     ZenPack Dependencies:
     Installation Notes: zopectl restart; zenhub restart ; zensiebelperf
@@ -98,15 +93,13 @@ Change History:
     1.0 initial release
     1.5
         3 datasources added to collect state, task, and performance data
-        zensiebelperf daemon added to collect data and serialize data
-collection
+        zensiebelperf daemon added to collect data and serialize data collection
         support for useMonitoredAttribute added to javascript
         support for manual deletion of components added to SiebelComponent
+	2.0	rebuilt to support Construction Kit and Zenoss 4.x
 
-Tested: This ZenPack was tested with Zenoss versions 3.1 and 3.2.
+Tested: This ZenPack was tested with Zenoss versions 3.x and Zenoss 4.x
 
 Source: https://github.com/zenoss/ZenPacks.community.zenSiebelCRM
 
-Known issues: None Yet
-
-
+Known issues: None

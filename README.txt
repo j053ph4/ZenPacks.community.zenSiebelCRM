@@ -96,7 +96,7 @@ Change History:
         zensiebelperf daemon added to collect data and serialize data collection
         support for useMonitoredAttribute added to javascript
         support for manual deletion of components added to SiebelComponent
-	2.0	rebuilt to support Construction Kit and Zenoss 4.x
+    2.0	rebuilt to support Construction Kit and Zenoss 4.x
 
 Tested: This ZenPack was tested with Zenoss versions 3.x and Zenoss 4.x
 

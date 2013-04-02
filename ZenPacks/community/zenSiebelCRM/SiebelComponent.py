@@ -1,97 +1,55 @@
-from Products.ZenModel.DeviceComponent import DeviceComponent
+from Products.ZenModel.OSComponent import OSComponent
+from Products.ZenModel.ZenPackPersistence import ZenPackPersistence
 from Products.ZenModel.ManagedEntity import ManagedEntity
-from Products.ZenModel.ZenossSecurity import ZEN_CHANGE_DEVICE
-from Products.ZenRelations.RelSchema import ToManyCont, ToOne
+from Products.ZenRelations.RelSchema import *
 
+'''
+args:  classname,classname,properties,_properties,relname,sortkey,viewname
+'''
 
-class SiebelComponent(DeviceComponent, ManagedEntity):
-    """
-    SiebelComponent is a Siebel CRM component
-    """
-    meta_type = portal_type = "SiebelComponent"
+class SiebelComponent(OSComponent, ManagedEntity, ZenPackPersistence):
+    '''
+    	basic Component class
+    '''
+    
+    portal_type = meta_type = 'SiebelComponent'
+    
+    CCalias = None
+    runState = None
+    endTime = None
+    CGalias = None
+    startTime = None
 
-    CGalias = ''
-    CCalias = ''
-    runState = ''
-    startTime = ''
-    endTime = ''
-    status = 1
+    _properties = (
+    {'id': 'CCalias', 'type': 'string','mode': '', 'switch': 'None' },
+    {'id': 'runState', 'type': 'string','mode': '', 'switch': 'None' },
+    {'id': 'endTime', 'type': 'string','mode': '', 'switch': 'None' },
+    {'id': 'CGalias', 'type': 'string','mode': '', 'switch': 'None' },
+    {'id': 'startTime', 'type': 'string','mode': '', 'switch': 'None' },
 
-    _properties = ManagedEntity._properties + (
-        {'id': 'CGalias', 'type': 'string', 'mode': ''},
-        {'id': 'CCalias', 'type': 'string', 'mode': ''},
-        {'id': 'runState', 'type': 'string', 'mode': ''},
-        {'id': 'startTime', 'type': 'string', 'mode': ''},
-        {'id': 'endTime', 'type': 'string', 'mode': ''},
-        {'id':'status', 'type':'int', 'mode':''},
     )
+    
+    _relations = OSComponent._relations + (
+        ('os', ToOne(ToManyCont, 'Products.ZenModel.OperatingSystem', 'siebelComponents')),
+        )
 
-    _relations = ManagedEntity._relations + (
-        ('siebelDevice', ToOne(ToManyCont,
-            'ZenPacks.community.zenSiebelCRM.SiebelDevice.SiebelDevice',
-            'siebelComponent',
-            ),
-        ),
-    )
-
-    factory_type_information = ({
-        'actions': ({
-            'id': 'perfConf',
-            'name': 'Template',
-            'action': 'objTemplates',
-            'permissions': (ZEN_CHANGE_DEVICE,),
-        },),
-    },)
-    
-    def viewName(self):
-        return self.CCalias
-    
-    titleOrId = name = viewName
-    
-    def primarySortKey(self):
-        return self.CCalias
-    
-    def statusMap(self):
-        """ map run state to zenoss status
-        """
-        stateValue = self.getStatusValue()
+    isUserCreatedFlag = True
+    def isUserCreated(self):
+        return self.isUserCreatedFlag
         
-        if stateValue == -1:
-            self.runState = 'Unknown'
-            self.status = -1
-        elif stateValue == 0:
-            self.runState = 'Shutdown'
-            self.status = 1
-        elif stateValue == 1:
-            self.runState = 'Unavailable'
-            self.status = 1
-        elif stateValue == 2:
-            self.runState = 'Stopped'
-            self.status = 1
-        elif stateValue == 3:
-            self.runState = 'Online'
-            self.status = 0
-        elif stateValue == 4:
-            self.runState = 'Running'
-            self.status = 0
+    def statusMap(self):
+        self.status = 0
         return self.status
-            
+    
     def getStatus(self):
         return self.statusMap()
+    
+    def primarySortKey(self):
+        return self.id
+    
+    def viewName(self):
+        return self.id
+    
+    name = titleOrId = viewName
 
-    def device(self):
-        return self.siebelDevice()
-    
-    def getStatusValue(self):
-        """ return numerical value of status check [1|0]
-        """
-        return int(self.cacheRRDValue('siebelRunStatus_runState',0))
-    
-    def manage_deleteComponent(self, REQUEST=None):
-        url = None
-        if REQUEST is not None:
-            url = self.device().siebelComponents.absolute_url()
-        self.getPrimaryParent()._delObject(self.id)
-        if REQUEST is not None:
-            REQUEST['RESPONSE'].redirect(url)
 

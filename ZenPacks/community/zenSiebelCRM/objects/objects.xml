@@ -17,7 +17,7 @@ True
 ${here/CCalias}
 </property>
 <property type="string" id="eventClass" mode="w" >
-/Status/Siebel
+/App/Siebel
 </property>
 <property type="int" id="severity" mode="w" >
 3
@@ -50,7 +50,7 @@ True
 ${here/CCalias}
 </property>
 <property type="string" id="eventClass" mode="w" >
-/Status/Siebel
+/App/Siebel
 </property>
 <property type="int" id="severity" mode="w" >
 3
@@ -891,7 +891,7 @@ False
 ${here/CCalias}
 </property>
 <property type="string" id="eventClass" mode="w" >
-/Status/Siebel
+/App/Siebel
 </property>
 <property type="int" id="severity" mode="w" >
 3
@@ -932,6 +932,12 @@ True
 </tomanycont>
 <tomanycont id='thresholds'>
 <object id='NumErrors' module='Products.ZenModel.MinMaxThreshold' class='MinMaxThreshold'>
+<property type="string" id="eventClass" mode="w" >
+/App/Siebel
+</property>
+<property type="int" id="severity" mode="w" >
+3
+</property>
 <property label="DataPoints" type="lines" id="dsnames" mode="w" >
 ['siebelStats_NumErrors']
 </property>
@@ -941,17 +947,17 @@ False
 <property type="string" id="maxval" mode="w" >
 25
 </property>
+<property type="int" id="escalateCount" mode="w" >
+2
+</property>
+</object>
+<object id='Number of Bad Tasks' module='Products.ZenModel.MinMaxThreshold' class='MinMaxThreshold'>
 <property type="string" id="eventClass" mode="w" >
 /App/Siebel
 </property>
 <property type="int" id="severity" mode="w" >
 3
 </property>
-<property type="int" id="escalateCount" mode="w" >
-2
-</property>
-</object>
-<object id='Number of Bad Tasks' module='Products.ZenModel.MinMaxThreshold' class='MinMaxThreshold'>
 <property label="DataPoints" type="lines" id="dsnames" mode="w" >
 ['siebelTasks_badTasks']
 </property>
@@ -961,17 +967,17 @@ True
 <property type="string" id="maxval" mode="w" >
 1
 </property>
+<property type="int" id="escalateCount" mode="w" >
+0
+</property>
+</object>
+<object id='Run State' module='Products.ZenModel.MinMaxThreshold' class='MinMaxThreshold'>
 <property type="string" id="eventClass" mode="w" >
 /App/Siebel
 </property>
 <property type="int" id="severity" mode="w" >
 3
 </property>
-<property type="int" id="escalateCount" mode="w" >
-0
-</property>
-</object>
-<object id='Run State' module='Products.ZenModel.MinMaxThreshold' class='MinMaxThreshold'>
 <property label="DataPoints" type="lines" id="dsnames" mode="w" >
 ['siebelRunStatus_runState']
 </property>
@@ -980,12 +986,6 @@ True
 </property>
 <property type="string" id="minval" mode="w" >
 1
-</property>
-<property type="string" id="eventClass" mode="w" >
-/App/Siebel
-</property>
-<property type="int" id="severity" mode="w" >
-3
 </property>
 <property type="int" id="escalateCount" mode="w" >
 0
@@ -1107,6 +1107,9 @@ AVERAGE
 </property>
 </object>
 <object id='SqlObjectCacheCpu' module='Products.ZenModel.DataPointGraphPoint' class='DataPointGraphPoint'>
+<property type="long" id="sequence" mode="w" >
+0
+</property>
 <property select_variable="lineTypes" type="selection" id="lineType" mode="w" >
 AREA
 </property>
@@ -1422,6 +1425,9 @@ AVERAGE
 </property>
 </object>
 <object id='InfraObjMgr SqlObjectCacheCpu' module='Products.ZenModel.DataPointGraphPoint' class='DataPointGraphPoint'>
+<property type="long" id="sequence" mode="w" >
+0
+</property>
 <property select_variable="lineTypes" type="selection" id="lineType" mode="w" >
 LINE
 </property>
@@ -1563,6 +1569,9 @@ True
 </property>
 <tomanycont id='graphPoints'>
 <object id='EventsProcessed' module='Products.ZenModel.DataPointGraphPoint' class='DataPointGraphPoint'>
+<property type="long" id="sequence" mode="w" >
+0
+</property>
 <property select_variable="lineTypes" type="selection" id="lineType" mode="w" >
 AREA
 </property>
@@ -1646,6 +1655,9 @@ True
 </property>
 <tomanycont id='graphPoints'>
 <object id='TotNodes' module='Products.ZenModel.DataPointGraphPoint' class='DataPointGraphPoint'>
+<property type="long" id="sequence" mode="w" >
+0
+</property>
 <property select_variable="lineTypes" type="selection" id="lineType" mode="w" >
 AREA
 </property>
@@ -1700,6 +1712,9 @@ True
 </property>
 <tomanycont id='graphPoints'>
 <object id='EAIBusObjCacheHits' module='Products.ZenModel.DataPointGraphPoint' class='DataPointGraphPoint'>
+<property type="long" id="sequence" mode="w" >
+0
+</property>
 <property select_variable="lineTypes" type="selection" id="lineType" mode="w" >
 LINE
 </property>
@@ -1812,6 +1827,9 @@ True
 </property>
 <tomanycont id='graphPoints'>
 <object id='EAIBusObjCacheCpu' module='Products.ZenModel.DataPointGraphPoint' class='DataPointGraphPoint'>
+<property type="long" id="sequence" mode="w" >
+0
+</property>
 <property select_variable="lineTypes" type="selection" id="lineType" mode="w" >
 LINE
 </property>
@@ -1895,6 +1913,9 @@ True
 </property>
 <tomanycont id='graphPoints'>
 <object id='FDRAgingRate' module='Products.ZenModel.DataPointGraphPoint' class='DataPointGraphPoint'>
+<property type="long" id="sequence" mode="w" >
+0
+</property>
 <property select_variable="lineTypes" type="selection" id="lineType" mode="w" >
 LINE
 </property>
@@ -2007,6 +2028,9 @@ True
 </property>
 <tomanycont id='graphPoints'>
 <object id='NumDBConnRtrs' module='Products.ZenModel.DataPointGraphPoint' class='DataPointGraphPoint'>
+<property type="long" id="sequence" mode="w" >
+0
+</property>
 <property select_variable="lineTypes" type="selection" id="lineType" mode="w" >
 AREA
 </property>
@@ -2119,6 +2143,9 @@ True
 </property>
 <tomanycont id='graphPoints'>
 <object id='MessagesDispatched' module='Products.ZenModel.DataPointGraphPoint' class='DataPointGraphPoint'>
+<property type="long" id="sequence" mode="w" >
+0
+</property>
 <property select_variable="lineTypes" type="selection" id="lineType" mode="w" >
 AREA
 </property>
@@ -2347,6 +2374,9 @@ AVERAGE
 </property>
 </object>
 <object id='InfraObjMgr SqlObjectCacheMem' module='Products.ZenModel.DataPointGraphPoint' class='DataPointGraphPoint'>
+<property type="long" id="sequence" mode="w" >
+0
+</property>
 <property select_variable="lineTypes" type="selection" id="lineType" mode="w" >
 LINE
 </property>
@@ -2401,6 +2431,9 @@ True
 </property>
 <tomanycont id='graphPoints'>
 <object id='PSPCacheHitTotal' module='Products.ZenModel.DataPointGraphPoint' class='DataPointGraphPoint'>
+<property type="long" id="sequence" mode="w" >
+0
+</property>
 <property select_variable="lineTypes" type="selection" id="lineType" mode="w" >
 AREA
 </property>
@@ -2479,8 +2512,14 @@ False
 <property type="boolean" id="hasSummary" mode="w" >
 True
 </property>
+<property type="long" id="sequence" mode="w" >
+0
+</property>
 <tomanycont id='graphPoints'>
 <object id='runState' module='Products.ZenModel.DataPointGraphPoint' class='DataPointGraphPoint'>
+<property type="long" id="sequence" mode="w" >
+0
+</property>
 <property select_variable="lineTypes" type="selection" id="lineType" mode="w" >
 AREA
 </property>
@@ -2535,6 +2574,9 @@ True
 </property>
 <tomanycont id='graphPoints'>
 <object id='Number of Bad Tasks' module='Products.ZenModel.ThresholdGraphPoint' class='ThresholdGraphPoint'>
+<property type="long" id="sequence" mode="w" >
+0
+</property>
 <property type="string" id="threshId" mode="w" >
 Number of Bad Tasks
 </property>
@@ -2745,6 +2787,9 @@ AVERAGE
 </property>
 </object>
 <object id='InfraObjMgr AvgRepSize' module='Products.ZenModel.DataPointGraphPoint' class='DataPointGraphPoint'>
+<property type="long" id="sequence" mode="w" >
+0
+</property>
 <property select_variable="lineTypes" type="selection" id="lineType" mode="w" >
 LINE
 </property>
@@ -3379,6 +3424,9 @@ AVERAGE
 </property>
 </object>
 <object id='InfraObjMgr AvgConnTime' module='Products.ZenModel.DataPointGraphPoint' class='DataPointGraphPoint'>
+<property type="long" id="sequence" mode="w" >
+0
+</property>
 <property select_variable="lineTypes" type="selection" id="lineType" mode="w" >
 LINE
 </property>
@@ -4158,6 +4206,9 @@ AVERAGE
 </property>
 </object>
 <object id='InfraObjMgr AvgReqs' module='Products.ZenModel.DataPointGraphPoint' class='DataPointGraphPoint'>
+<property type="long" id="sequence" mode="w" >
+0
+</property>
 <property select_variable="lineTypes" type="selection" id="lineType" mode="w" >
 LINE
 </property>
@@ -4534,32 +4585,6 @@ if evt.summary.find(searchString) &gt;= 0:
 		status = "Running"
 	evt.summary = evt.component+" is "+status
 </property>
-<property type="text" id="transform" mode="w" >
-searchString = "Run State"
-if evt.summary.find(searchString) &gt;= 0:
-	value = evt.summary[evt.summary.find("current value ")+14:len(evt.summary)-1]
-	status = "BLAH"
-	val = int(float(value))
-	if val == -1:
-		evt.severity = 2
-		status = "Unknown"
-	if val == 0:
-		evt.severity = 3
-		status = "Shutdown"
-	if val == 1:
-		evt.severity = 3
-		status = "Unavailable"
-	if val == 2:
-		evt.severity = 4
-		status = "Stopped"
-	if val == 3:
-		evt.severity = 0
-		status = "Online"
-	if val == 4:
-		evt.severity = 0
-		status = "Running"
-	evt.summary = evt.component+" is "+status
-</property>
 </object>
 <!-- ('', 'zport', 'dmd', 'Processes', 'Siebel') -->
 <object id='/zport/dmd/Processes/Siebel' module='Products.ZenModel.OSProcessOrganizer' class='OSProcessOrganizer'>
@@ -4573,6 +4598,9 @@ sieblproc.exe
 </property>
 <property type="string" id="regex" mode="w" >
 sieblproc.exe
+</property>
+<property type="boolean" id="ignoreParametersWhenModeling" mode="w" >
+False
 </property>
 <property type="boolean" id="ignoreParameters" mode="w" >
 False
@@ -4591,6 +4619,9 @@ siebmtsh.exe
 <property type="string" id="regex" mode="w" >
 siebmtsh.exe
 </property>
+<property type="boolean" id="ignoreParametersWhenModeling" mode="w" >
+False
+</property>
 <property type="boolean" id="ignoreParameters" mode="w" >
 False
 </property>
@@ -4600,28 +4631,6 @@ False
 <property visible="True" type="boolean" id="zMonitor" >
 False
 </property>
-<tomany id='instances'>
-<link objid='/zport/dmd/Devices/Server/Windows/Cluster/devices/fsbgtwycl2.na.atxglobal.com/os/processes/siebmtsh.exe ddd77217c0488a5afce3693e98c2b377'/>
-<link objid='/zport/dmd/Devices/Server/Windows/Cluster/devices/fsbgtwycl2.na.atxglobal.com/os/processes/siebmtsh.exe fe97b4904e8ecc781405c453f0c706e6'/>
-<link objid='/zport/dmd/Devices/Server/Windows/Cluster/devices/fsbgtwycl2.na.atxglobal.com/os/processes/siebmtsh.exe 6ec20771278c45feaf94f191eed78d80'/>
-<link objid='/zport/dmd/Devices/Server/Windows/Cluster/devices/fsbgtwycl2.na.atxglobal.com/os/processes/siebmtsh.exe 7e84eee0f3d11e6ff3cd86b3f8dc2598'/>
-<link objid='/zport/dmd/Devices/Server/Windows/Cluster/devices/fsbapp3cl2.na.atxglobal.com/os/processes/siebmtsh.exe 8fc5dad04e410adf089cf3797b46679f'/>
-<link objid='/zport/dmd/Devices/Server/Windows/Cluster/devices/fsbapp3cl2.na.atxglobal.com/os/processes/siebmtsh.exe d9676ad2d5819394838141e87779ce14'/>
-<link objid='/zport/dmd/Devices/Server/Windows/Cluster/devices/fsbapp3cl2.na.atxglobal.com/os/processes/siebmtsh.exe 497f34db7814334e9bdedf7364fde644'/>
-<link objid='/zport/dmd/Devices/Server/Windows/Cluster/devices/fsbapp3cl2.na.atxglobal.com/os/processes/siebmtsh.exe f2621475e3c0c7b3c0b0eaad6cd1a915'/>
-<link objid='/zport/dmd/Devices/Server/Windows/Cluster/devices/fsbgtwyawv.na.atxglobal.com/os/processes/siebmtsh.exe ddd77217c0488a5afce3693e98c2b377'/>
-<link objid='/zport/dmd/Devices/Server/Windows/Cluster/devices/fsbgtwyawv.na.atxglobal.com/os/processes/siebmtsh.exe fe97b4904e8ecc781405c453f0c706e6'/>
-<link objid='/zport/dmd/Devices/Server/Windows/Cluster/devices/fsbgtwyawv.na.atxglobal.com/os/processes/siebmtsh.exe 6ec20771278c45feaf94f191eed78d80'/>
-<link objid='/zport/dmd/Devices/Server/Windows/Cluster/devices/fsbgtwyawv.na.atxglobal.com/os/processes/siebmtsh.exe 7e84eee0f3d11e6ff3cd86b3f8dc2598'/>
-<link objid='/zport/dmd/Devices/Server/Windows/Cluster/devices/fsbapp3cl1.na.atxglobal.com/os/processes/siebmtsh.exe 8fc5dad04e410adf089cf3797b46679f'/>
-<link objid='/zport/dmd/Devices/Server/Windows/Cluster/devices/fsbapp3cl1.na.atxglobal.com/os/processes/siebmtsh.exe d9676ad2d5819394838141e87779ce14'/>
-<link objid='/zport/dmd/Devices/Server/Windows/Cluster/devices/fsbapp3cl1.na.atxglobal.com/os/processes/siebmtsh.exe 497f34db7814334e9bdedf7364fde644'/>
-<link objid='/zport/dmd/Devices/Server/Windows/Cluster/devices/fsbapp3cl1.na.atxglobal.com/os/processes/siebmtsh.exe f2621475e3c0c7b3c0b0eaad6cd1a915'/>
-<link objid='/zport/dmd/Devices/Server/Windows/Cluster/devices/fsbapp3awv.na.atxglobal.com/os/processes/siebmtsh.exe f2621475e3c0c7b3c0b0eaad6cd1a915'/>
-<link objid='/zport/dmd/Devices/Server/Windows/Cluster/devices/fsbapp3awv.na.atxglobal.com/os/processes/siebmtsh.exe 8fc5dad04e410adf089cf3797b46679f'/>
-<link objid='/zport/dmd/Devices/Server/Windows/Cluster/devices/fsbapp3awv.na.atxglobal.com/os/processes/siebmtsh.exe d9676ad2d5819394838141e87779ce14'/>
-<link objid='/zport/dmd/Devices/Server/Windows/Cluster/devices/fsbapp3awv.na.atxglobal.com/os/processes/siebmtsh.exe 497f34db7814334e9bdedf7364fde644'/>
-</tomany>
 </object>
 <object id='siebmtshmw.exe' module='Products.ZenModel.OSProcessClass' class='OSProcessClass'>
 <property type="string" id="name" mode="w" >
@@ -4629,6 +4638,9 @@ siebmtshmw.exe
 </property>
 <property type="string" id="regex" mode="w" >
 siebmtshmw.exe
+</property>
+<property type="boolean" id="ignoreParametersWhenModeling" mode="w" >
+False
 </property>
 <property type="boolean" id="ignoreParameters" mode="w" >
 False
@@ -4639,64 +4651,6 @@ False
 <property visible="True" type="boolean" id="zMonitor" >
 False
 </property>
-<tomany id='instances'>
-<link objid='/zport/dmd/Devices/Server/Windows/Cluster/devices/fsbgtwycl2.na.atxglobal.com/os/processes/siebmtshmw.exe 6c147feb5f695ed163e2a4c002788333'/>
-<link objid='/zport/dmd/Devices/Server/Windows/Cluster/devices/fsbgtwycl2.na.atxglobal.com/os/processes/siebmtshmw.exe df07abcbed7e352b6a79e1ed24099f29'/>
-<link objid='/zport/dmd/Devices/Server/Windows/Cluster/devices/fsbgtwycl2.na.atxglobal.com/os/processes/siebmtshmw.exe b3f7a570e453c6fd3c063844e5e1f797'/>
-<link objid='/zport/dmd/Devices/Server/Windows/Cluster/devices/fsbgtwycl2.na.atxglobal.com/os/processes/siebmtshmw.exe a4c1d5baea5e5d268447c2341c6e73ec'/>
-<link objid='/zport/dmd/Devices/Server/Windows/Cluster/devices/fsbgtwycl2.na.atxglobal.com/os/processes/siebmtshmw.exe 0623c9058660013f73403a37f58467eb'/>
-<link objid='/zport/dmd/Devices/Server/Windows/Cluster/devices/fsbgtwycl2.na.atxglobal.com/os/processes/siebmtshmw.exe 46852b1ef5a29ef9becd5abe46f793a3'/>
-<link objid='/zport/dmd/Devices/Server/Windows/Cluster/devices/fsbgtwycl2.na.atxglobal.com/os/processes/siebmtshmw.exe 52d4829b808fe2674911a710755dff80'/>
-<link objid='/zport/dmd/Devices/Server/Windows/Cluster/devices/fsbgtwycl2.na.atxglobal.com/os/processes/siebmtshmw.exe 3d4626df2cce988f5f50fc054a54bab2'/>
-<link objid='/zport/dmd/Devices/Server/Windows/Cluster/devices/fsbgtwycl2.na.atxglobal.com/os/processes/siebmtshmw.exe 8a8f78cc58e711813ca6e720256f8412'/>
-<link objid='/zport/dmd/Devices/Server/Windows/Cluster/devices/fsbgtwycl2.na.atxglobal.com/os/processes/siebmtshmw.exe b25c2d2ada25354c8ba50bfe595c9e76'/>
-<link objid='/zport/dmd/Devices/Server/Windows/Cluster/devices/fsbgtwycl2.na.atxglobal.com/os/processes/siebmtshmw.exe de23d22cc1c4a4be37b551d385b99251'/>
-<link objid='/zport/dmd/Devices/Server/Windows/Cluster/devices/fsbgtwycl2.na.atxglobal.com/os/processes/siebmtshmw.exe 432bdeb096cf6892625b560195fe919a'/>
-<link objid='/zport/dmd/Devices/Server/Windows/Cluster/devices/fsbgtwycl2.na.atxglobal.com/os/processes/siebmtshmw.exe c595581498e0aff1ebe180b488c20598'/>
-<link objid='/zport/dmd/Devices/Server/Windows/Cluster/devices/fsbapp3cl2.na.atxglobal.com/os/processes/siebmtshmw.exe 5fde3a9737b0cc160fd8b9bdf978df55'/>
-<link objid='/zport/dmd/Devices/Server/Windows/Cluster/devices/fsbapp3cl2.na.atxglobal.com/os/processes/siebmtshmw.exe ab36509e127bbb333d46882864afba65'/>
-<link objid='/zport/dmd/Devices/Server/Windows/Cluster/devices/fsbapp3cl2.na.atxglobal.com/os/processes/siebmtshmw.exe c0db2d89b869e2c057f18babafbae7f2'/>
-<link objid='/zport/dmd/Devices/Server/Windows/Cluster/devices/fsbapp3cl2.na.atxglobal.com/os/processes/siebmtshmw.exe bb6e28328ef0d730e327ecbd10a7077f'/>
-<link objid='/zport/dmd/Devices/Server/Windows/Cluster/devices/fsbapp3cl2.na.atxglobal.com/os/processes/siebmtshmw.exe 60ac5267f672bc54121abed47abada6e'/>
-<link objid='/zport/dmd/Devices/Server/Windows/Cluster/devices/fsbapp3cl2.na.atxglobal.com/os/processes/siebmtshmw.exe 9dcdbb3ad525dee3558e935dd5d63eb2'/>
-<link objid='/zport/dmd/Devices/Server/Windows/Cluster/devices/fsbapp3cl2.na.atxglobal.com/os/processes/siebmtshmw.exe dec9cd1ff3e35f5e24a802ff4b7d2862'/>
-<link objid='/zport/dmd/Devices/Server/Windows/Cluster/devices/fsbgtwyawv.na.atxglobal.com/os/processes/siebmtshmw.exe 6c147feb5f695ed163e2a4c002788333'/>
-<link objid='/zport/dmd/Devices/Server/Windows/Cluster/devices/fsbgtwyawv.na.atxglobal.com/os/processes/siebmtshmw.exe df07abcbed7e352b6a79e1ed24099f29'/>
-<link objid='/zport/dmd/Devices/Server/Windows/Cluster/devices/fsbgtwyawv.na.atxglobal.com/os/processes/siebmtshmw.exe b3f7a570e453c6fd3c063844e5e1f797'/>
-<link objid='/zport/dmd/Devices/Server/Windows/Cluster/devices/fsbgtwyawv.na.atxglobal.com/os/processes/siebmtshmw.exe a4c1d5baea5e5d268447c2341c6e73ec'/>
-<link objid='/zport/dmd/Devices/Server/Windows/Cluster/devices/fsbgtwyawv.na.atxglobal.com/os/processes/siebmtshmw.exe 0623c9058660013f73403a37f58467eb'/>
-<link objid='/zport/dmd/Devices/Server/Windows/Cluster/devices/fsbgtwyawv.na.atxglobal.com/os/processes/siebmtshmw.exe 46852b1ef5a29ef9becd5abe46f793a3'/>
-<link objid='/zport/dmd/Devices/Server/Windows/Cluster/devices/fsbgtwyawv.na.atxglobal.com/os/processes/siebmtshmw.exe 52d4829b808fe2674911a710755dff80'/>
-<link objid='/zport/dmd/Devices/Server/Windows/Cluster/devices/fsbgtwyawv.na.atxglobal.com/os/processes/siebmtshmw.exe 3d4626df2cce988f5f50fc054a54bab2'/>
-<link objid='/zport/dmd/Devices/Server/Windows/Cluster/devices/fsbgtwyawv.na.atxglobal.com/os/processes/siebmtshmw.exe 8a8f78cc58e711813ca6e720256f8412'/>
-<link objid='/zport/dmd/Devices/Server/Windows/Cluster/devices/fsbgtwyawv.na.atxglobal.com/os/processes/siebmtshmw.exe b25c2d2ada25354c8ba50bfe595c9e76'/>
-<link objid='/zport/dmd/Devices/Server/Windows/Cluster/devices/fsbgtwyawv.na.atxglobal.com/os/processes/siebmtshmw.exe de23d22cc1c4a4be37b551d385b99251'/>
-<link objid='/zport/dmd/Devices/Server/Windows/Cluster/devices/fsbgtwyawv.na.atxglobal.com/os/processes/siebmtshmw.exe 432bdeb096cf6892625b560195fe919a'/>
-<link objid='/zport/dmd/Devices/Server/Windows/Cluster/devices/fsbgtwyawv.na.atxglobal.com/os/processes/siebmtshmw.exe c595581498e0aff1ebe180b488c20598'/>
-<link objid='/zport/dmd/Devices/Server/Windows/Cluster/devices/fsbapp3cl1.na.atxglobal.com/os/processes/siebmtshmw.exe 5fde3a9737b0cc160fd8b9bdf978df55'/>
-<link objid='/zport/dmd/Devices/Server/Windows/Cluster/devices/fsbapp3cl1.na.atxglobal.com/os/processes/siebmtshmw.exe ab36509e127bbb333d46882864afba65'/>
-<link objid='/zport/dmd/Devices/Server/Windows/Cluster/devices/fsbapp3cl1.na.atxglobal.com/os/processes/siebmtshmw.exe c0db2d89b869e2c057f18babafbae7f2'/>
-<link objid='/zport/dmd/Devices/Server/Windows/Cluster/devices/fsbapp3cl1.na.atxglobal.com/os/processes/siebmtshmw.exe bb6e28328ef0d730e327ecbd10a7077f'/>
-<link objid='/zport/dmd/Devices/Server/Windows/Cluster/devices/fsbapp3cl1.na.atxglobal.com/os/processes/siebmtshmw.exe 60ac5267f672bc54121abed47abada6e'/>
-<link objid='/zport/dmd/Devices/Server/Windows/Cluster/devices/fsbapp3cl1.na.atxglobal.com/os/processes/siebmtshmw.exe 9dcdbb3ad525dee3558e935dd5d63eb2'/>
-<link objid='/zport/dmd/Devices/Server/Windows/Cluster/devices/fsbapp3cl1.na.atxglobal.com/os/processes/siebmtshmw.exe dec9cd1ff3e35f5e24a802ff4b7d2862'/>
-<link objid='/zport/dmd/Devices/Server/Windows/Cluster/devices/fsbapp3awv.na.atxglobal.com/os/processes/siebmtshmw.exe 5fde3a9737b0cc160fd8b9bdf978df55'/>
-<link objid='/zport/dmd/Devices/Server/Windows/Cluster/devices/fsbapp3awv.na.atxglobal.com/os/processes/siebmtshmw.exe ab36509e127bbb333d46882864afba65'/>
-<link objid='/zport/dmd/Devices/Server/Windows/Cluster/devices/fsbapp3awv.na.atxglobal.com/os/processes/siebmtshmw.exe c0db2d89b869e2c057f18babafbae7f2'/>
-<link objid='/zport/dmd/Devices/Server/Windows/Cluster/devices/fsbapp3awv.na.atxglobal.com/os/processes/siebmtshmw.exe bb6e28328ef0d730e327ecbd10a7077f'/>
-<link objid='/zport/dmd/Devices/Server/Windows/Cluster/devices/fsbapp3awv.na.atxglobal.com/os/processes/siebmtshmw.exe 60ac5267f672bc54121abed47abada6e'/>
-<link objid='/zport/dmd/Devices/Server/Windows/Cluster/devices/fsbapp3awv.na.atxglobal.com/os/processes/siebmtshmw.exe 9dcdbb3ad525dee3558e935dd5d63eb2'/>
-<link objid='/zport/dmd/Devices/Server/Windows/Cluster/devices/fsbapp3awv.na.atxglobal.com/os/processes/siebmtshmw.exe dec9cd1ff3e35f5e24a802ff4b7d2862'/>
-<link objid='/zport/dmd/Devices/Server/Windows/Cluster/devices/fsbapp3cl2.na.atxglobal.com/os/processes/siebmtshmw.exe f0e0a73e8de3166e007e2bb9bbf53bfd'/>
-<link objid='/zport/dmd/Devices/Server/Windows/Cluster/devices/fsbapp3cl1.na.atxglobal.com/os/processes/siebmtshmw.exe f0e0a73e8de3166e007e2bb9bbf53bfd'/>
-<link objid='/zport/dmd/Devices/Server/Windows/Cluster/devices/fsbapp3awv.na.atxglobal.com/os/processes/siebmtshmw.exe f0e0a73e8de3166e007e2bb9bbf53bfd'/>
-<link objid='/zport/dmd/Devices/Server/Windows/Cluster/devices/fsbapp3cl2.na.atxglobal.com/os/processes/siebmtshmw.exe 1e0d4d8fcbd2cbeda93a0901ced20eb3'/>
-<link objid='/zport/dmd/Devices/Server/Windows/Cluster/devices/fsbapp3cl2.na.atxglobal.com/os/processes/siebmtshmw.exe 849bc8474b28419d064421a67a8a506c'/>
-<link objid='/zport/dmd/Devices/Server/Windows/Cluster/devices/fsbapp3cl1.na.atxglobal.com/os/processes/siebmtshmw.exe 1e0d4d8fcbd2cbeda93a0901ced20eb3'/>
-<link objid='/zport/dmd/Devices/Server/Windows/Cluster/devices/fsbapp3cl1.na.atxglobal.com/os/processes/siebmtshmw.exe 849bc8474b28419d064421a67a8a506c'/>
-<link objid='/zport/dmd/Devices/Server/Windows/Cluster/devices/fsbapp3awv.na.atxglobal.com/os/processes/siebmtshmw.exe 1e0d4d8fcbd2cbeda93a0901ced20eb3'/>
-<link objid='/zport/dmd/Devices/Server/Windows/Cluster/devices/fsbapp3awv.na.atxglobal.com/os/processes/siebmtshmw.exe 849bc8474b28419d064421a67a8a506c'/>
-</tomany>
 </object>
 <object id='siebprocmw.exe' module='Products.ZenModel.OSProcessClass' class='OSProcessClass'>
 <property type="string" id="name" mode="w" >
@@ -4704,6 +4658,9 @@ siebprocmw.exe
 </property>
 <property type="string" id="regex" mode="w" >
 siebprocmw.exe
+</property>
+<property type="boolean" id="ignoreParametersWhenModeling" mode="w" >
+False
 </property>
 <property type="boolean" id="ignoreParameters" mode="w" >
 False
@@ -4714,36 +4671,6 @@ False
 <property visible="True" type="boolean" id="zMonitor" >
 False
 </property>
-<tomany id='instances'>
-<link objid='/zport/dmd/Devices/Server/Windows/Cluster/devices/fsbgtwycl2.na.atxglobal.com/os/processes/siebprocmw.exe feead011600efee899ea400c15d12eea'/>
-<link objid='/zport/dmd/Devices/Server/Windows/Cluster/devices/fsbgtwycl2.na.atxglobal.com/os/processes/siebprocmw.exe 1940cb128ece0a1f8bacef5780ebd747'/>
-<link objid='/zport/dmd/Devices/Server/Windows/Cluster/devices/fsbgtwycl2.na.atxglobal.com/os/processes/siebprocmw.exe 5fa75354b63f39d6fb7de331f58c9050'/>
-<link objid='/zport/dmd/Devices/Server/Windows/Cluster/devices/fsbgtwycl2.na.atxglobal.com/os/processes/siebprocmw.exe a2b26e2f77b8ffda37ba5653276377fb'/>
-<link objid='/zport/dmd/Devices/Server/Windows/Cluster/devices/fsbgtwycl2.na.atxglobal.com/os/processes/siebprocmw.exe 6862fc0264084b6919b7b19320892c3e'/>
-<link objid='/zport/dmd/Devices/Server/Windows/Cluster/devices/fsbgtwycl2.na.atxglobal.com/os/processes/siebprocmw.exe fc1f6cf67571bb710cadc1ce11d4c97a'/>
-<link objid='/zport/dmd/Devices/Server/Windows/Cluster/devices/fsbgtwycl2.na.atxglobal.com/os/processes/siebprocmw.exe 6af350ed4bafcd5a35f3c8a81a1dafdd'/>
-<link objid='/zport/dmd/Devices/Server/Windows/Cluster/devices/fsbgtwycl2.na.atxglobal.com/os/processes/siebprocmw.exe 25fc14494755efe05bf8f6ca8e013451'/>
-<link objid='/zport/dmd/Devices/Server/Windows/Cluster/devices/fsbgtwycl2.na.atxglobal.com/os/processes/siebprocmw.exe 8292677ba212e86bdf230e022f4ed44d'/>
-<link objid='/zport/dmd/Devices/Server/Windows/Cluster/devices/fsbgtwycl2.na.atxglobal.com/os/processes/siebprocmw.exe cce1d41029ac6b68efe22a714c679cc7'/>
-<link objid='/zport/dmd/Devices/Server/Windows/Cluster/devices/fsbapp3cl2.na.atxglobal.com/os/processes/siebprocmw.exe 4d10c550d6c11ff69423629bf6389f7a'/>
-<link objid='/zport/dmd/Devices/Server/Windows/Cluster/devices/fsbapp3cl2.na.atxglobal.com/os/processes/siebprocmw.exe 38451b8220fabe783ee05abb18719662'/>
-<link objid='/zport/dmd/Devices/Server/Windows/Cluster/devices/fsbgtwyawv.na.atxglobal.com/os/processes/siebprocmw.exe feead011600efee899ea400c15d12eea'/>
-<link objid='/zport/dmd/Devices/Server/Windows/Cluster/devices/fsbgtwyawv.na.atxglobal.com/os/processes/siebprocmw.exe 1940cb128ece0a1f8bacef5780ebd747'/>
-<link objid='/zport/dmd/Devices/Server/Windows/Cluster/devices/fsbgtwyawv.na.atxglobal.com/os/processes/siebprocmw.exe 5fa75354b63f39d6fb7de331f58c9050'/>
-<link objid='/zport/dmd/Devices/Server/Windows/Cluster/devices/fsbgtwyawv.na.atxglobal.com/os/processes/siebprocmw.exe a2b26e2f77b8ffda37ba5653276377fb'/>
-<link objid='/zport/dmd/Devices/Server/Windows/Cluster/devices/fsbgtwyawv.na.atxglobal.com/os/processes/siebprocmw.exe 6862fc0264084b6919b7b19320892c3e'/>
-<link objid='/zport/dmd/Devices/Server/Windows/Cluster/devices/fsbgtwyawv.na.atxglobal.com/os/processes/siebprocmw.exe fc1f6cf67571bb710cadc1ce11d4c97a'/>
-<link objid='/zport/dmd/Devices/Server/Windows/Cluster/devices/fsbgtwyawv.na.atxglobal.com/os/processes/siebprocmw.exe 6af350ed4bafcd5a35f3c8a81a1dafdd'/>
-<link objid='/zport/dmd/Devices/Server/Windows/Cluster/devices/fsbgtwyawv.na.atxglobal.com/os/processes/siebprocmw.exe 25fc14494755efe05bf8f6ca8e013451'/>
-<link objid='/zport/dmd/Devices/Server/Windows/Cluster/devices/fsbgtwyawv.na.atxglobal.com/os/processes/siebprocmw.exe 8292677ba212e86bdf230e022f4ed44d'/>
-<link objid='/zport/dmd/Devices/Server/Windows/Cluster/devices/fsbgtwyawv.na.atxglobal.com/os/processes/siebprocmw.exe cce1d41029ac6b68efe22a714c679cc7'/>
-<link objid='/zport/dmd/Devices/Server/Windows/Cluster/devices/fsbapp3cl1.na.atxglobal.com/os/processes/siebprocmw.exe 4d10c550d6c11ff69423629bf6389f7a'/>
-<link objid='/zport/dmd/Devices/Server/Windows/Cluster/devices/fsbapp3cl1.na.atxglobal.com/os/processes/siebprocmw.exe 38451b8220fabe783ee05abb18719662'/>
-<link objid='/zport/dmd/Devices/Server/Windows/Cluster/devices/fsbapp3awv.na.atxglobal.com/os/processes/siebprocmw.exe 4d10c550d6c11ff69423629bf6389f7a'/>
-<link objid='/zport/dmd/Devices/Server/Windows/Cluster/devices/fsbapp3awv.na.atxglobal.com/os/processes/siebprocmw.exe 38451b8220fabe783ee05abb18719662'/>
-<link objid='/zport/dmd/Devices/Server/Windows/Cluster/devices/fsbgtwycl2.na.atxglobal.com/os/processes/siebprocmw.exe 55a56c44bc649e535f7a75536d6add93'/>
-<link objid='/zport/dmd/Devices/Server/Windows/Cluster/devices/fsbgtwyawv.na.atxglobal.com/os/processes/siebprocmw.exe 55a56c44bc649e535f7a75536d6add93'/>
-</tomany>
 </object>
 <object id='siebsvc.exe' module='Products.ZenModel.OSProcessClass' class='OSProcessClass'>
 <property type="string" id="name" mode="w" >
@@ -4751,6 +4678,9 @@ siebsvc.exe
 </property>
 <property type="string" id="regex" mode="w" >
 siebsvc.exe
+</property>
+<property type="boolean" id="ignoreParametersWhenModeling" mode="w" >
+False
 </property>
 <property type="boolean" id="ignoreParameters" mode="w" >
 False
@@ -4761,13 +4691,6 @@ False
 <property visible="True" type="boolean" id="zMonitor" >
 False
 </property>
-<tomany id='instances'>
-<link objid='/zport/dmd/Devices/Server/Windows/Cluster/devices/fsbgtwycl2.na.atxglobal.com/os/processes/siebsvc.exe'/>
-<link objid='/zport/dmd/Devices/Server/Windows/Cluster/devices/fsbapp3cl2.na.atxglobal.com/os/processes/siebsvc.exe'/>
-<link objid='/zport/dmd/Devices/Server/Windows/Cluster/devices/fsbgtwyawv.na.atxglobal.com/os/processes/siebsvc.exe'/>
-<link objid='/zport/dmd/Devices/Server/Windows/Cluster/devices/fsbapp3cl1.na.atxglobal.com/os/processes/siebsvc.exe'/>
-<link objid='/zport/dmd/Devices/Server/Windows/Cluster/devices/fsbapp3awv.na.atxglobal.com/os/processes/siebsvc.exe'/>
-</tomany>
 </object>
 </tomanycont>
 </object>

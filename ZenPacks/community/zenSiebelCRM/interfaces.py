@@ -1,46 +1,32 @@
 from Products.Zuul.form import schema
 from Products.Zuul.interfaces.component import IComponentInfo
-from Products.Zuul.interfaces import IInfo
+from Products.Zuul.interfaces import IFacade
 from Products.Zuul.utils import ZuulMessageFactory as _t
+from Products.ZenModel.ZVersion import VERSION as ZENOSS_VERSION
+from Products.ZenUtils.Version import Version
+
+if Version.parse('Zenoss ' + ZENOSS_VERSION) >= Version.parse('Zenoss 4'):
+    SingleLineText = schema.TextLine
+    MultiLineText = schema.Text
+else:
+    SingleLineText = schema.Text
+    MultiLineText = schema.TextLine
 
 
 class ISiebelComponentInfo(IComponentInfo):
-    CGalias = schema.Text(title=_t(u"CGalias"),group='Overview', order=1)
-    runState = schema.Text(title=_t(u"runState"),group='Overview', order=2)
-    CCalias = schema.Text(title=_t(u"CCalias"),group='Details')
-    startTime = schema.Text(title=_t(u"startTime"),group='Details')
-    endTime = schema.Text(title=_t(u"endTime"),group='Details')
+    ''''''
+    CCalias = SingleLineText(title=_t(u'CC Alias'))
+    runState = SingleLineText(title=_t(u'State'))
+    endTime = SingleLineText(title=_t(u'End Time'))
+    CGalias = SingleLineText(title=_t(u'CG Alias'))
+    startTime = SingleLineText(title=_t(u'Start Time'))
 
 
-class ISiebelPerfDataSourceInfo(IInfo):
-    name = schema.Text(title=_t(u"Name"),
-                       xtype="idfield",
-                       description=_t(u"The name of this datasource"))
-    type = schema.Text(title=_t(u"Type"),
-                       readonly=True)
-    command = schema.Text(title=_t(u"Command"),
-                          description=_t(u"Example: list servers show SBLSRVR_NAME,HOST_NAME,SBLSRVR_STATE,START_TIME,END_TIME "))
-    enabled = schema.Bool(title=_t(u"Enabled"))
 
-class ISiebelTasksDataSourceInfo(IInfo):
-    name = schema.Text(title=_t(u"Name"),
-                       xtype="idfield",
-                       description=_t(u"The name of this datasource"))
-    type = schema.Text(title=_t(u"Type"),
-                       readonly=True)
-    command = schema.Text(title=_t(u"Command"),
-                          description=_t(u"Example: list servers show SBLSRVR_NAME,HOST_NAME,SBLSRVR_STATE,START_TIME,END_TIME "),
-                          readonly=True)
-    enabled = schema.Bool(title=_t(u"Enabled"))
+class IzenSiebelCRMFacade(IFacade):
+    ''''''
 
-class ISiebelStatusDataSourceInfo(IInfo):
-    name = schema.Text(title=_t(u"Name"),
-                       xtype="idfield",
-                       description=_t(u"The name of this datasource"))
-    type = schema.Text(title=_t(u"Type"),
-                       readonly=True)
-    command = schema.Text(title=_t(u"Command"),
-                          description=_t(u"Example: list servers show SBLSRVR_NAME,HOST_NAME,SBLSRVR_STATE,START_TIME,END_TIME "),
-                          readonly=True)
-    enabled = schema.Bool(title=_t(u"Enabled"))
+    def addSiebelComponent(self, ob, **kwargs):
+        ''''''
+
 

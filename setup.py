@@ -5,10 +5,10 @@
 NAME = "ZenPacks.community.zenSiebelCRM"
 VERSION = "2.0"
 AUTHOR = "Joseph Anderson"
-LICENSE = ""
+LICENSE = "Apache"
 NAMESPACE_PACKAGES = ['ZenPacks', 'ZenPacks.community']
 PACKAGES = ['ZenPacks', 'ZenPacks.community', 'ZenPacks.community.zenSiebelCRM']
-INSTALL_REQUIRES = []
+INSTALL_REQUIRES = ['ZenPacks.community.ConstructionKit']
 COMPAT_ZENOSS_VERS = ">=3.0"
 PREV_ZENPACK_NAME = ""
 # STOP_REPLACEMENTS

@@ -1,3 +1,5 @@
+import logging
+log = logging.getLogger('zen.zenhub')
 import sys, os, re, pexpect
 import Globals
 from optparse import OptionParser
@@ -7,108 +9,64 @@ from twisted.internet.utils import getProcessOutput
 
 
 class SiebelHandler():
-    """ Class to handle input/output from srvrmgr for 
-        a Zenoss device
-    """
-    
+    """ Handler for srvrmgr session """
     def __init__(self):
-        """ 
-        """
-        # path to the executable
-        self.binPath = zenPath('libexec') + '/srvrmgr'
+        """"""
+        self.cmd = '%s/srvrmgr' % zenPath('libexec') # path to the executable'
         self.connected = False
         self.blocked = False
-        # number of servers currently sharing this srvrmgr session
-        self.servers = 0
-        # number of times the session has been run
-        self.timesRun = 0
-        # list of servers currently using this session.
-        self.clients= []
+        self.servers = 0 # number of servers currently sharing this srvrmgr session
+        self.timesRun = 0 # number of times the session has been run
+        self.clients= [] # list of servers currently using this session.
         self.message = 'UNINITIALIZED'
-        
-    def initialize(self,gateway=None,enterprise=None,server=None,user=None,password=None,timeout=120,useGateway=False):
-        """ initialize Siebel connection for Zenoss device
-        """
+    
+    def initialize(self,gateway=None,enterprise=None,server=None,user=None,password=None,timeout=30,useGateway=False):
+        """ initialize Siebel connection for Zenoss device """
         self.gateway = gateway
         self.enterprise = enterprise
         self.server = server
         self.user = user
         self.password = password
         self.useGateway = useGateway
-        self.connectString = self.binPath
-        self.connectString += ' /g ' + self.gateway.upper()
-        self.connectString += ' /e ' + self.enterprise.upper()
+        self.args = ['/g %s' % self.gateway.upper(), '/e %s' % self.enterprise.upper(),'/u %s' % self.user, '/p %s' % self.password]
         self.prompt = 'srvrmgr'
         if self.useGateway == False:
-            self.connectString += ' /s ' + self.server.upper()
-            self.prompt = 'srvrmgr:'+self.server.upper()
-        self.connectString += ' /u ' + self.user
-        self.connectString += ' /p ' + self.password
+            self.args.append('/s %s' % self.server.upper())
+            self.prompt += ':%s' % self.server.upper()
+        self.prompt += '> '
+        self.connectString = '%s %s' % (self.cmd, ' '.join(self.args))
         self.timeout = timeout
-        self.child = pexpect.spawn(self.connectString)
-        self.testConnected()
-
-    def testConnected(self):
-        """ 
-            Examine prompt to determine connection status
-        """
-        try:
-            reply = self.child.expect([self.prompt,pexpect.EOF,pexpect.TIMEOUT], timeout=self.timeout)
-            if reply == 0:
-                self.connected = True
-                #self.blocked = False
-                self.message = "CONNECTION OK"
-            elif reply == 1:
-                self.message = "CONNECTION EOF"
-                self.connected = False
-            elif reply == 2:
-                self.message = "CONNECTION TIMEOUT"
-                self.connected = False
-            else:
-                self.message = "CONNECTION UNKNOWN"
-                self.connected = False
-        except:
-            self.connected = False
-            self.message = 'CONNECTION FAILED'
+        self.connect()
     
-    def testSessionConnected(self):
-        """
-            return True if connected
-        """
-        if self.connected == False and self.blocked == True:
-            return False
-        command = "list servers show SBLSRVR_NAME,SBLSRVR_STATE"
-        try:
-            output = self.getCommandOutput(command)
-            if len(output.items()) > 0:
-                return True
-        except:
-            pass
-        return False
-
-    def testServerConnected(self,server):
-        """
-            return True if given server is connected
-        """
-        command = "list server " + server + " show SBLSRVR_NAME,SBLSRVR_STATE"
-        output = self.getCommandOutput(command)
-        try:
-            if output['SBLSRVR_STATE'][0] == "Running":
-                return True
-        except:
-            pass
-        return False
-
+    def connect(self):
+        ''' connect to gateway'''
+        log.debug('connecting using %s' % self.connectString)
+        self.child = pexpect.spawn(self.connectString)
+        #fout = file('mylog.txt','w')
+        #self.child.logfile = fout
+        self.getExpect(self.prompt)
+        self.testConnected()
+        self.sendCommand('set delimiter |')
+        
     def terminate(self):
-        """ end the srvrmgr connection
-        """
+        """ end the srvrmgr connection """
+        log.debug('terminating connection using %s' % self.connectString)
         try:
             self.child.sendline('exit')
+            self.child.expect('Disconnecting from server.')
             self.child.close(force=True)
         except:
             pass
         self.child.terminate(force=True)  
         self.connected = False
+    
+    def sendCommand(self, command):
+        '''send a command to srvrmgr'''
+        log.debug('sending command: %s' % command)
+        self.child.sendline(command)
+        self.getExpect(command)
+        self.getExpect(self.prompt)
+        return self.child.before
     
     def getCommandOutput(self,command):
         """ execute a command against srvrmgr and 
@@ -116,107 +74,114 @@ class SiebelHandler():
         """
         output = self.execCommand(command)
         data = self.parseOutput(output)
+        log.debug("command: '%s' result:%s" % (command, data))
         return data
-        
+    
     def execCommand(self,command):
         """ execute a given srvrmgr command and wait
             for the prompt
         """
         try:
-            self.child.sendline(command)
-            self.testConnected()
-            if self.connected == True:
-                return self.child.before
-            else:
-                return None
+            return self.sendCommand(command)
         except:
+            log.warn("no output received from command: '%s'" % command)
             return None
-
-    def parseOutput(self,data):
-        """ convert the srvrmgr output to a python dictionary
-        """
         
-        space = re.compile(r'\s+')
+    def getExpect(self,match):
+        '''check output for connection status'''
+        statusDict = {
+                      0: {'connect': True, 'msg': 'CONNECTION OK'},
+                      1: {'connect': False, 'msg': 'CONNECTION EOF'},
+                      2: {'connect': False, 'msg': 'CONNECTION TIMEOUT'},
+                      }
+        reply = self.child.expect([match,pexpect.EOF,pexpect.TIMEOUT], timeout=self.timeout)
         try:
-            lines = data.splitlines()
+            self.connected = statusDict[reply]['connect']
+            self.message = statusDict[reply]['msg']
         except:
-            lines = []
-        datadict = {}
-        headers = []
-        rows = []
-
-        # first find the data header, determine number of columns
+            self.connected = False
+            self.message = 'CONNECTION FAILED'
+        log.debug("getExpect status for %s: %s , %s" % (match, self.connected, self.message))
+    
+    def getKeys(self, lines):
+        """find keys for output data dict"""
+        headline = ''
         for i,line in enumerate(lines):
             # finish query if error detected
+            if line.startswith('----'): 
+                headline = lines[i-1]
+                lines.remove(headline)
+                lines.remove(line)
+        header = "".join(headline.rstrip('|').split())
+        return header.split('|'),lines
+    
+    def parseOutput(self, output):
+        """ convert the srvrmgr output to a python dictionary """
+        results = []
+        try:
+            lines = output.splitlines()
+        except:
+            lines = []
+        keys,lines  =  self.getKeys(lines)
+        lines.remove(lines[0]) # this should be the result
+        for line in lines:
             if re.match('error code',line) or re.match('system error',line):
                 self.status = 1
-                return datadict
-            if line.startswith('----'): 
-                headers = lines[i-1].split()
-
-        for h in headers: # set up list entries for dictionary
-            datadict[h] = []
-            
-        # next find the row data
-        collect=False
-        for i,line in enumerate(lines):
-            if i == 0:
-                collect=False
-                continue
-            if len(line) == 0:
-                collect=False
-                continue
-                
-            if line.startswith('----'):
-                collect = True
-                continue
-            if collect == True:
-                rowdata = line.split()
-                if len(rowdata) == len(headers):
-                    rows.append(rowdata)
-                elif len(rowdata) > len(headers):
-                    while len(rowdata) > len(headers):
-                        rowdata[0] += " "+rowdata[1]
-                        rowdata.remove(rowdata[1])
-                    rows.append(rowdata)
-                else:
-                    continue
-                    
-        for row in rows: # now parse it into a dictionary structure  
-            for i,header in enumerate(headers):
-                datadict[header].append(row[i])
-                
-        return datadict                 
+                return []
+            data = dict.fromkeys(keys)
+            if '---' in line:  continue
+            if len(line) == 0: continue
+            if 'rows returned' in line:  continue
+            nline =  re.sub("\s\s+",'',line.rstrip('|'))
+            values = nline.split('|')
+            if len(values) != len(data.keys()) : continue
+            for i, v in enumerate(values): 
+                data[keys[i]] = v.rstrip(' ').lstrip(' ')
+            results.append(data)
+        return results
     
-    def statDict(self,dictionary={},keyField=None,valueField=None):
-        """ return nagios-style output
-        """
+    def statDict(self, data=[],keyField=None,valueField=None):
+        """ return nagios-style output """
         newDict = {}
-        try:
-            entries = len(dictionary[dictionary.keys()[0]])
-            for i in range(entries):
-                dataKey = dictionary[keyField][i]
-                dataValue = dictionary[valueField][i]
-                newDict[dataKey] = dataValue
-        except:
-            pass
+        for d in data:
+            newDict[d[keyField]] = d[valueField]
         return newDict
     
-    def isServerRunning(self):
-        """ determine if server is running
-        """
-        command = 'list servers show SBLSRVR_NAME,HOST_NAME,SBLSRVR_STATE,START_TIME,END_TIME'
-        data = self.getCommandOutput(command)
-        entries = len(data[data.keys()[0]])
-        if entries == 0:
+    def isServerRunning(self, server):
+        """ determine if server is running """
+        command = "list server %s show SBLSRVR_STATE" % server
+        output = self.getCommandOutput(command)
+        try:
+            for d in data:
+                if data['SBLSRVR_STATE'] == "Running": return True
+        except: 
+            log.warn("could not determine status of %s using '%s'" % (server, command))
+        return False
+    
+    def testServerConnected(self,server): return self.isServerRunning(server)
+    
+    def testConnected(self):
+        try:
+            self.sendCommand('help alias')
+        except:
+            self.connected = False
+            self.message = 'CONNECTION FAILED'
+        log.debug('connection test results: %s %s' % (self.connected, self.message))
+    
+    def testSessionConnected(self):
+        """ return True if connected """
+        if self.connected == False and self.blocked == True:
             return False
-        else:
-            for e in range(entries):
-                siebelServer = data['SBLSRVR_NAME'][e]
-                siebelState = data['SBLSRVR_STATE'][e]
-                if siebelServer == self.server:
-                    if siebelState != 'Running':
-                        return False
-        return True
-
-
+        command = "list servers show SBLSRVR_NAME"
+        try:
+            if len(self.getCommandOutput(command)) > 0: return True
+        except: 
+            log.warn("session connection test using '%s' failed" % command)
+        return False
+    
+    def resetConnections(self):
+        """"""
+        log.debug('refreshing enterprise')
+        command = 'refresh enterprise'
+        self.child.sendline(command)
+        self.testConnected(False)

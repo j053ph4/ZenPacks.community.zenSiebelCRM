@@ -1,18 +1,16 @@
-from zope.interface import implements
-from Products.Zuul.infos import ProxyProperty
-from Products.Zuul.infos.component import ComponentInfo
-from ZenPacks.community.zenSiebelCRM.interfaces import *
+from ZenPacks.community.ConstructionKit.ClassHelper import *
 
-'''
-args:  zenpack,compInfo,compInterface,infoProperties
-'''
+def SiebelComponentgetEventClassesVocabulary(context):
+    return SimpleVocabulary.fromValues(context.listgetEventClasses())
 
-class SiebelComponentInfo(ComponentInfo):
-    implements( ISiebelComponentInfo )
-    CCalias = ProxyProperty('CCalias')
-    runState = ProxyProperty('runState')
-    endTime = ProxyProperty('endTime')
-    CGalias = ProxyProperty('CGalias')
-    startTime = ProxyProperty('startTime')
+class SiebelComponentInfo(ClassHelper.SiebelComponentInfo):
+    ''''''
+
+from ZenPacks.community.zenSiebelCRM.datasources.SiebelComponentDataSource import *
+def SiebelComponentRedirectVocabulary(context):
+    return SimpleVocabulary.fromValues(SiebelComponentDataSource.onRedirectOptions)
+
+class SiebelComponentDataSourceInfo(ClassHelper.SiebelComponentDataSourceInfo):
+    ''''''
 
 

@@ -1,5 +1,5 @@
 from ZenPacks.community.ConstructionKit.ClassHelper import *
 
-class SiebelComponent(ClassHelper.SiebelComponent):
+class SiebelComponentDataSource(ClassHelper.SiebelComponentDataSource):
     ''''''
 

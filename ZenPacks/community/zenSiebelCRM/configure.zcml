@@ -4,34 +4,36 @@
         xmlns:browser="http://namespaces.zope.org/browser"
         xmlns:zcml="http://namespaces.zope.org/zcml">
         <configure zcml:condition="installed Products.Zuul">
-        
-        	<include package="Products.ZenUtils.extdirect.zope" file="meta.zcml"/>
-        	<!-- Global Info -->
+
+            <include package="Products.ZenUtils.extdirect.zope" file="meta.zcml"/>
+
+
+            <!-- ZenPack Info -->
 
             <browser:directRouter
                 name="zenSiebelCRM_router"
                 for="*"
-                class=".routers.zenSiebelCRMRouter"
+                class="ZenPacks.community.zenSiebelCRM.routers.zenSiebelCRMRouter"
                 namespace="Zenoss.remote"
                 permission="zenoss.View"
             />
     
             <adapter
                 name="zenSiebelCRMAdapter"
-                provides=".interfaces.IzenSiebelCRMFacade"
+                provides="ZenPacks.community.zenSiebelCRM.interfaces.IzenSiebelCRMFacade"
                 for="*"
-                factory=".facades.zenSiebelCRMFacade"
+                factory="ZenPacks.community.zenSiebelCRM.facades.zenSiebelCRMFacade"
             />
                 
             <browser:resourceDirectory
                     name="zenSiebelCRM"
                     directory="resources"
             />
-                
+
             <!-- Component Info -->
-            <adapter factory=".info.SiebelComponentInfo"
-                for=".SiebelComponent.SiebelComponent"
-                provides=".interfaces.ISiebelComponentInfo"
+            <adapter factory="ZenPacks.community.zenSiebelCRM.info.SiebelComponentInfo"
+                for="ZenPacks.community.zenSiebelCRM.SiebelComponent.SiebelComponent"
+                provides="ZenPacks.community.zenSiebelCRM.interfaces.ISiebelComponentInfo"
             />
     
             <browser:viewlet
@@ -43,8 +45,28 @@
                 permission="zope2.Public"
             />
 
+            <utility provides="zope.schema.interfaces.IVocabularyFactory"
+                component=".info.SiebelComponentgetEventClassesVocabulary"
+                name="SiebelComponentgetEventClasses"
+            />
 
-        
+            <!-- Datasource Info -->
+            <adapter factory="ZenPacks.community.zenSiebelCRM.info.SiebelComponentDataSourceInfo"
+                for="ZenPacks.community.zenSiebelCRM.datasources.SiebelComponentDataSource.SiebelComponentDataSource"
+                provides="ZenPacks.community.zenSiebelCRM.interfaces.ISiebelComponentDataSourceInfo"
+            />
+
+            <utility provides="zope.schema.interfaces.IVocabularyFactory"
+                component=".info.SiebelComponentRedirectVocabulary"
+                name="SiebelComponentRedirectVocabulary"
+            />
+
+            <subscriber zcml:condition="installed ZenPacks.zenoss.DistributedCollector.interfaces"
+                for="ZenPacks.zenoss.DistributedCollector.DistributedPerformanceConf.DistributedPerformanceConf
+                     ZenPacks.zenoss.DistributedCollector.interfaces.ICollectorInstalled"
+                handler=".onCollectorInstalledSiebelComponent"
+            />
+
         </configure>
     </configure>
 

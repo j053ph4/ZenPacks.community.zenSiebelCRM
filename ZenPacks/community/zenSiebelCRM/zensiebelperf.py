@@ -14,11 +14,11 @@ from Products.ZenUtils.observable import ObservableMixin
 from Products.ZenUtils.Utils import unused
 from ZenPacks.community.zenSiebelCRM.SiebelHandler import SiebelHandler
 from ZenPacks.community.zenSiebelCRM.services.SiebelConfigService import SiebelConfigService
+from Products.ZenUtils.Driver import drive
 
 unused(Globals)
 unused(SiebelConfigService)
 
-from Products.ZenUtils.Driver import drive
 
 class ZenSiebelPreferences(object):
     zope.interface.implements(ICollectorPreferences)
@@ -96,7 +96,7 @@ class ZenSiebelTask(ObservableMixin):
             post collection activities
         """
         if not isinstance(result, Failure):
-            log.info("Successful scan of %s completed", self._devId)
+            log.debug("Successful scan of %s completed", self._devId)
         else:
             log.error("Unsuccessful scan of %s completed, result=%s", self._devId, result.getErrorMessage())
         return result
@@ -108,7 +108,7 @@ class ZenSiebelTask(ObservableMixin):
         """
         err = result.getErrorMessage()
         log.error("Unable to scan device %s: %s", self._devId, err)
-        self.failedConnection(self._taskConfig.zSiebelServer,self.siebelClient)
+        self.failedConnection(self.siebelClient)
         self._eventService.sendEvent(ZenSiebelTask.WARNING_EVENT, device=self._devId, summary="Error collecting performance data: %s" % err)
         return result
 
@@ -116,7 +116,7 @@ class ZenSiebelTask(ObservableMixin):
         """
             Connect to the Siebel device asynchronously.
         """
-        log.info("Connecting to %s", self._devId)
+        log.debug("Connecting to %s", self._devId)
         self.state = ZenSiebelTask.STATE_CONNECTING
         self.siebelClient = self.recycleConnection()
         if self.siebelClient not in self._preferences.siebelclients:
@@ -127,7 +127,7 @@ class ZenSiebelTask(ObservableMixin):
         """
         Callback for a successful asynchronous connection request.
         """
-        log.info("Connected to %s", self._devId)
+        log.debug("Connected to %s", self._devId)
         
     def _collectSuccessful(self, result):
         """
@@ -135,7 +135,7 @@ class ZenSiebelTask(ObservableMixin):
         request.
         """
         #log.debug("Successful collection from %s [%s], result=%s",self._devId, self._manageIp, result)
-        log.info("Successful collection of %s (%d datasources)",
+        log.info("Successful collection of %s (%s datasources)",
                   self._devId, len(result.keys()))
         for compId,dsDict in result.items():
             for dsId,compDict in dsDict.items():
@@ -149,7 +149,7 @@ class ZenSiebelTask(ObservableMixin):
                                                     cycleTime=self.interval,
                                                     min=dpDict['minv'],
                                                     max=dpDict['maxv'])
-                    except Exception:
+                    except:
                         log.exception("Unable to write for %s for device [%s]",
                                       dpId, self._devId)
         self.siebelClient.timesRun += 1
@@ -161,7 +161,7 @@ class ZenSiebelTask(ObservableMixin):
         data has been processed.
         """
         
-        log.info("Post-collect cleanup for %s, run %d times",self._devId,self.siebelClient.timesRun)
+        log.info("Post-collect cleanup for %s, run %s times",self._devId,self.siebelClient.timesRun)
         self.ageConnection()
         return defer.succeed(None)
         
@@ -200,70 +200,58 @@ class ZenSiebelTask(ObservableMixin):
         d.addBoth(self._finished)
         return d
     
-    def getTasks(self,data,component):
+    def getTasks(self,data=[]):
         """ retrieve task status for an individual component
         """
-        log.info("Collecting Task data for for %d",self._devId)
-        numTasks = 0
+        log.info("Collecting Task data for for %s",self._devId)
         goodTasks = 0
-        badTasks = 0
-        entries = len(data[data.keys()[0]])
-        #log.info('Found %d tasks',entries)
-        numTasks = entries
-        for i in range(entries):
-            
-            taskStatus = 'UNKNOWN'
+        numTasks = len(data)
+        goodStatus = ['RUNNING','COMPLETED','ONLINE']
+        for d in data:
             try:
-                taskStatus = data['TK_DISP_RUNSTATE'][i].upper()
+                taskStatus = d['TK_DISP_RUNSTATE'].upper()
             except:
-                pass
-            
-            if (taskStatus == 'RUNNING' or taskStatus == 'COMPLETED'  or taskStatus == 'ONLINE'):
+                taskStatus = 'UNKNOWN'
+            if taskStatus in goodStatus:   
                 goodTasks += 1
-            else:
-                badTasks += 1
-
+        badTasks = numTasks - goodTasks
         return numTasks,goodTasks,badTasks
     
-    def getRunState(self,data,component):
+    def getRunState(self,data):
         """ find the run status of this component
         """
-        log.info("Collecting Run State for for %d",self._devId)
-        statenum = -1
+        log.debug("Collecting Run State for for %s",self._devId)
+        runStateMap = {
+               'Running': 4,
+               'Online': 3,
+               'Unavailable': 2,
+               'Stopped': 1,
+               'Shutdown': 0,
+               }
         try:
-            runstate = data['CP_DISP_RUN_STATE'][0]
-            #log.debug("state is %s",runstate)
-            if runstate == 'Online':
-                statenum = 3
-            elif runstate == 'Running':
-                statenum = 4
-            elif runstate == 'Unavailable':
-                statenum = 2
-            elif runstate == 'Stopped':
-                statenum = 1
-            elif runstate == 'Shutdown':
-                statenum = 0
+            runstate = data['CP_DISP_RUN_STATE']
+            statenum = runStateMap[runstate]
         except:
-            pass
+            statenum = -1
         return statenum
         
     def createConnection(self):
         """ create a new srvrmgr connection
         """
-        log.info("Creating new session for G: %s and E: %s with SHARING: %s and TIMEOUT: %d",
+        log.debug("Creating new session for G: %s and E: %s with SHARING: %s and TIMEOUT: %s",
                  self._taskConfig.zSiebelGateway.upper(),
                  self._taskConfig.zSiebelEnterprise.upper(),
-                 self._taskConfig.shareGateway,
+                 True,
                  self._taskConfig.timeoutSeconds)
         session = SiebelHandler()
         session.initialize(self._taskConfig.zSiebelGateway,
                            self._taskConfig.zSiebelEnterprise,
-                           self._taskConfig.zSiebelServer,
+                           None,
                            self._taskConfig.zSiebelUser,
                            self._taskConfig.zSiebelPassword,
                            self._taskConfig.timeoutSeconds,
-                           self._taskConfig.shareGateway)
-        log.info("Session created for G: %s and E: %s with the message: %s",
+                           True)
+        log.debug("Session created for G: %s and E: %s with the message: %s",
                  self._taskConfig.zSiebelGateway.upper(),
                  self._taskConfig.zSiebelEnterprise.upper(),
                  session.message)
@@ -275,7 +263,7 @@ class ZenSiebelTask(ObservableMixin):
         """ 
             Examine running sessions, determine which can be used
         """
-        log.info("Examining %d active sessions for use by %s",len(self._preferences.siebelclients),self._devId)
+        log.debug("Examining %s active sessions for use by %s",len(self._preferences.siebelclients),self._devId)
         
         goodSessions = []
         # counting unblocked sessions
@@ -283,13 +271,13 @@ class ZenSiebelTask(ObservableMixin):
         # first loop through sessions and try to kill any that are blocked/disconnected
         for index,session in enumerate(self._preferences.getSiebelClients()):
             passed = False
-            log.info("Evaluating session %d to G: %s and E: %s with %s servers",
+            log.debug("Evaluating session %s to G: %s and E: %s with %s servers",
                      index,
                      session.gateway.upper(),
                      session.enterprise.upper(),
                      len(session.clients))
             if session.connected == False:
-                log.warn("Session %d to G: %s and E: %s with %s servers failed previously with the message: %s",
+                log.warn("Session %s to G: %s and E: %s with %s servers failed previously with the message: %s",
                                 index,
                                 session.gateway.upper(),
                                 session.enterprise.upper(),
@@ -297,17 +285,16 @@ class ZenSiebelTask(ObservableMixin):
                                 session.message)
                 # perform another test to see if the connection is OK
                 if session.blocked == False:
-                    log.warn("Testing session %d to G: %s and E: %s with %s servers",
+                    log.warn("Testing session %s to G: %s and E: %s with %s servers",
                             index,
                             session.gateway.upper(),
                             session.enterprise.upper(),
-                            len(session.clients),
-                            session.message)
+                            len(session.clients))
                     # test the session for connectivity
-                    session.testConnected() 
+                    session.testConnected()
                     # set session to blocked if it failed further testing
                     if session.connected == False: 
-                        log.warn("FAILED test of session %d to G: %s and E: %s with %s servers with message: %s",
+                        log.warn("    FAILED test of session %s to G: %s and E: %s with %s servers with message: %s",
                                 index,
                                 session.gateway.upper(),
                                 session.enterprise.upper(),
@@ -316,7 +303,7 @@ class ZenSiebelTask(ObservableMixin):
                         # set session to blocked
                         self.setBlocked(session)
                     else:
-                        log.warn("SUCCEEDED test of session %d to G: %s and E: %s with %s servers with message: %s",
+                        log.warn("    SUCCEEDED test of session %s to G: %s and E: %s with %s servers with message: %s",
                                 index,
                                 session.gateway.upper(),
                                 session.enterprise.upper(),
@@ -327,7 +314,7 @@ class ZenSiebelTask(ObservableMixin):
                         unblockedSessions += 1
                         
                 else: # try resetting the session if it is still bad
-                    log.warn("Skipping BLOCKED session %d to G: %s and E: %s with %s servers with message: %s",
+                    log.warn("    Skipping BLOCKED session %s to G: %s and E: %s with %s servers with message: %s",
                             index,
                             session.gateway.upper(),
                             session.enterprise.upper(),
@@ -338,7 +325,7 @@ class ZenSiebelTask(ObservableMixin):
             else: # session is OK
                 if session.blocked == False: # connection not blocked due to age.
                     unblockedSessions += 1
-                    log.info("Session %d to G: %s and E: %s with %s servers passed with message: %s",
+                    log.debug("    Session %s to G: %s and E: %s with %s servers passed with message: %s",
                              index,
                              session.gateway.upper(),
                              session.enterprise.upper(),
@@ -351,7 +338,7 @@ class ZenSiebelTask(ObservableMixin):
             else:
                 self.resetSession(session)
                 
-        log.info("%d sessions passed examination",len(goodSessions))  
+        log.debug("%s sessions passed examination",len(goodSessions))  
         return goodSessions
 
     def recycleConnection(self):
@@ -361,25 +348,25 @@ class ZenSiebelTask(ObservableMixin):
         """
 
         sessions = self.examineSessions()
-        log.info("Recycling %d sessions for use by %s",len(sessions),self._devId)
+        log.debug("Recycling %s sessions for use by %s",len(sessions),self._devId)
         for index,session in enumerate(sessions): # look through current sessions and try to reuse one       
             # if session matches the connection parameters of this server
             if session.gateway.upper() == self._taskConfig.zSiebelGateway.upper() and session.enterprise.upper() == self._taskConfig.zSiebelEnterprise.upper():
                 # if session is noat full, is connected, and is not blocked
                 if len(session.clients) < self.maxPerGateway:
-                    if session.connected == True and session.blocked == False:
-                        log.info("Device %s using session %d to G: %s and E: %s shared by %d servers", 
-                                self._devId,
-                                index,
-                                session.gateway.upper(),
-                                session.enterprise.upper(),
-                                len(session.clients))
-                        # add to list of session clients if not already
-                        if self._devId not in session.clients:
-                            session.clients.append(self._devId)
-                        return session
+                    if session.connected == True:
+                        if session.blocked == False:
+                            log.debug("    Device %s using session %s to G: %s and E: %s shared by %s servers", 
+                                    self._devId,
+                                    index,
+                                    session.gateway.upper(),
+                                    session.enterprise.upper(),
+                                    len(session.clients))
+                            return session
+                        else:
+                            log.warn("    Session %s is blocked, evaluating next session" % index)
                     
-        log.info("Device %s found no available connection to G: %s and E: %s",
+        log.warn("    Device %s found no available connection to G: %s and E: %s",
                  self._devId,
                  self._taskConfig.zSiebelGateway.upper(),
                  self._taskConfig.zSiebelEnterprise.upper())
@@ -391,6 +378,7 @@ class ZenSiebelTask(ObservableMixin):
         """
         def inner(driver):
             log.info("Finding connection for %s",self._devId)
+            log.debug("Current Client Connected: %s Blocked: %s" % (self.siebelClient.connected,self.siebelClient.blocked))
             if self.siebelClient.connected == True and self.siebelClient.blocked == False:
                 yield defer.succeed(None)
             else:
@@ -401,42 +389,32 @@ class ZenSiebelTask(ObservableMixin):
         """
             blocked flag will prevent session from reuse in future polling cycles
         """
-        if session.blocked == False:
-            log.warn("Setting session BLOCKED to TRUE for G: %s and E: %s with message: %s",
-                        session.gateway.upper(),
-                        session.enterprise.upper(),
-                        session.message)
-            session.blocked = True
+        try:
+            if session.blocked == False:
+                log.warn("Setting session BLOCKED to TRUE for G: %s and E: %s with message: %s",
+                            session.gateway.upper(),
+                            session.enterprise.upper(),
+                            session.message)
+                session.blocked = True
+        except:
+            pass
         
-    def failedConnection(self,server,session):
+    def failedConnection(self,session):
         """ 
             deal with failed collection
         """
-        log.warn("Post-failure test of SRVRMGR session to G: %s shared by %d servers for %s",session.gateway.upper(),len(self.siebelClient.clients),self._devId)
+        log.warn("Post-failure test of SRVRMGR session to G: %s shared by %s servers for %s",session.gateway.upper(),len(self.siebelClient.clients),self._devId)
         if session:
             # first test that session is still connected self._taskConfig.zSiebelServer
             session.connected = session.testSessionConnected()
             if session.connected == True:
-                log.warn("SRVRMGR session to G: %s E: %s shared by %d servers CONNECTED with message: %s", 
+                log.warn("SRVRMGR session to G: %s E: %s shared by %s servers CONNECTED with message: %s", 
                              session.gateway.upper(),
                              session.enterprise.upper(),
                              len(session.clients),
                              session.message)
-                # if true, test if server is connected to gateway
-                if session.testServerConnected(self._taskConfig.zSiebelServer) == True:
-                    log.warn("SRVRMGR session to S: %s G: %s E: %s CONNECTED with message: %s", 
-                             session.server.upper(),
-                             session.gateway.upper(),
-                             session.enterprise.upper(),
-                             session.message)
-                else: # if server not connected, send event that server is disconnected
-                    log.warn("SRVRMGR session to S: %s G: %s E: %s FAILED with message: %s", 
-                             session.server.upper(),
-                             session.gateway.upper(),
-                             session.enterprise.upper(),
-                             session.message)
             else: # session is disconnected, discontinue use
-                log.warn("SRVRMGR session to G: %s E: %s shared by %d servers FAILED with message: %s", 
+                log.warn("SRVRMGR session to G: %s E: %s shared by %s servers FAILED with message: %s", 
                              session.gateway.upper(),
                              session.enterprise.upper(),
                              len(session.clients),
@@ -450,9 +428,9 @@ class ZenSiebelTask(ObservableMixin):
         """
         denom = len(self.siebelClient.clients)
         timesRun = int(self.siebelClient.timesRun / denom)
-        log.info("Testing calculated age %d against max age %d for session run %d times",timesRun,self._taskConfig.cyclesPerConnection,self.siebelClient.timesRun)
+        log.debug("Testing calculated age %s against max age %s for session run %s times",timesRun,self._taskConfig.cyclesPerConnection,self.siebelClient.timesRun)
         if timesRun > self._taskConfig.cyclesPerConnection:
-            log.info("Max connection age %s reached after %d cycles for G: %s and E: %s", 
+            log.debug("Max connection age %s reached after %s cycles for G: %s and E: %s", 
                      self._taskConfig.cyclesPerConnection, 
                      timesRun,
                      self.siebelClient.gateway.upper(),
@@ -464,22 +442,22 @@ class ZenSiebelTask(ObservableMixin):
         """
             Terminate srvrmgr connection and remove from list of sessions
         """
-        log.info("Attempting to reset session to G: %s shared by %d servers with message: %s",session.gateway.upper(),len(session.clients),session.message)
+        log.debug("Attempting to reset session to G: %s shared by %s servers with message: %s",session.gateway.upper(),len(session.clients),session.message)
         if len(session.clients) > 0: # end the session only if no servers are still using it
-            log.info("Reset cannot proceed because G: %s still shared by %d servers",session.gateway.upper(),len(session.clients))
+            log.warn("Reset cannot proceed because G: %s still shared by %s servers",session.gateway.upper(),len(session.clients))
             self.dropServer(session)
         
         else: #  can safely terminate if not in use
-            log.info("Reset can proceed since G: %s is not in use",session.gateway.upper())
+            log.debug("Reset can proceed since G: %s is not in use",session.gateway.upper())
             try:
                 session.terminate()
                 self._preferences.siebelclients.remove(session)
-                log.info("Termination of session to G: %s E: %s SUCCEEDED",
-                         session.gateway.uppper(),
+                log.debug("Termination of session to G: %s E: %s SUCCEEDED",
+                         session.gateway.upper(),
                          session.enterprise.upper())
             except:
                 log.warn("Termination of session to G: %s E: %s FAILED with message: %s",
-                         session.gateway.uppper(),
+                         session.gateway.upper(),
                          session.enterprise.upper(),
                          session.message)
         
@@ -490,12 +468,12 @@ class ZenSiebelTask(ObservableMixin):
         #if session.blocked == True:
         if self._devId in session.clients:
             session.clients.remove(self._devId)
-        log.info("Removing S: %s from blocked session to G: %s shared by  %d servers",
+        log.debug("Removing S: %s from blocked session to G: %s shared by  %s servers",
                 self._devId,
                 session.gateway.upper(),
                 len(session.clients))
         if len(session.clients) == 0: # set disconnected flag if not used
-            log.info("Session to G: %s is unused (%d servers remaining).  OK to disconnect",
+            log.debug("Session to G: %s is unused (%s servers remaining).  OK to disconnect",
                      session.gateway.upper(),
                      len(session.clients))
             
@@ -506,30 +484,28 @@ class ZenSiebelTask(ObservableMixin):
         """   
         def inner(driver):
             result = {}
-            log.info("Executing commands for %s (%d datasources)", self._devId,len(self._taskConfig.datasources.items()))
+            log.debug("Executing commands for %s (%s datasources)", self._devId,len(self._taskConfig.datasources.items()))
             for compId,dsDict in self._taskConfig.datasources.items():
                 result[compId] = {}
-                log.info("Collecting data for component: %s on device: %s",compId,self._devId)
+                log.debug("Collecting data for component: %s on device: %s",compId,self._devId)
                 for dsId,compDict in dsDict.items():
                     result[compId][dsId] = {}
                     command = compDict['command']
                     sourcetype = compDict['sourcetype']
-                    
-                    #log.info("Executing command: %s for type: %s",command,sourcetype)
+                    log.debug("Executing command: %s for type: %s",command,sourcetype)
                     output = self.siebelClient.getCommandOutput(command)
-                    if sourcetype == 'SiebelStatus': # collect the status of each component
-                        result[compId][dsId]['runState'] = self.getRunState(output,compId)
-                    if sourcetype == 'SiebelTasks': # analyze the stats for each component
-                        numTasks,goodTasks,badTasks = self.getTasks(output,compId)
+                    if len(output) == 1 and 'CP_DISP_RUN_STATE' in command:
+                        result[compId][dsId]['runState'] = self.getRunState(output[0])
+                    elif 'list tasks' in command:
+                        numTasks,goodTasks,badTasks = self.getTasks(output)
                         result[compId][dsId]['numTasks'] = numTasks
                         result[compId][dsId]['goodTasks'] = goodTasks
                         result[compId][dsId]['badTasks'] = badTasks
-                    if sourcetype == 'SiebelPerf': # collect performance data for each component
+                    else:
                         dataItems = self.siebelClient.statDict(output,'STAT_ALIAS','CURR_VAL')
                         for dpId,dpValue in dataItems.items():
                             result[compId][dsId][dpId] = dpValue
             yield defer.succeed(result)
-
         return drive(inner)
      
 if __name__ == '__main__':

@@ -4,54 +4,83 @@
 #
 ######################################################################
 from Products.DataCollector.plugins.CollectorPlugin import PythonPlugin
-from Products.DataCollector.plugins.CollectorPlugin import CollectorPlugin
 from Products.DataCollector.plugins.DataMaps import ObjectMap
+from ZenPacks.community.zenSiebelCRM.Definition import *
 from ZenPacks.community.zenSiebelCRM.SiebelHandler import SiebelHandler
 from Products.ZenUtils.Utils import zenPath,prepId
 
+                   
+KEYMAP = {
+          'CP_DISP_RUN_STATE': 'cp_disp_run_state',
+          'CP_STARTMODE': 'cp_startmode',
+          'CC_RUNMODE': 'cc_runmode',
+          'CP_MAX_TASKS': 'cp_max_tasks',
+          'CC_NAME': 'cc_name',
+          'CC_ALIAS': 'cc_alias',
+          'CG_ALIAS': 'cg_alias',
+          'CT_ALIAS': 'ct_alias',
+          'SV_NAME' : 'sv_name',
+          }
+
 class siebelComponentMap(PythonPlugin):
     """Map srvrmgmr output table to model."""
-
-    relname = "siebelComponents"
-    modname = "ZenPacks.community.zenSiebelCRM.SiebelComponent"
+    constr = Construct(SiebelDefinition)
     
-    deviceProperties = PythonPlugin.deviceProperties + (
-                    'zSiebelGateway',
-                    'zSiebelEnterprise',
-                    'zSiebelServer',
-                    'zSiebelUser',
-                    'zSiebelPassword',
-                    )
+    compname = "os"
+    relname = constr.relname
+    modname = constr.zenpackComponentModule
+    baseid = constr.baseid
+    
+    deviceProperties = PythonPlugin.deviceProperties + tuple([p[0] for p in SiebelDefinition.packZProperties])
+
+    def startGtwySession(self, device, log):
+        ''' connect to Siebel Server'''
+        self.siebel = SiebelHandler()
+        self.siebel.initialize(device.zSiebelGateway,device.zSiebelEnterprise,None,device.zSiebelUser,device.zSiebelPassword,120,True)
+
+    def findServerName(self, device, log):
+        '''find server name variable'''
+        command = 'list servers show SBLSRVR_NAME,HOST_NAME'
+        output = self.siebel.getCommandOutput(command)
+        for o in output:
+            log.debug("finding server in :%s" % o)
+            servername = o['SBLSRVR_NAME']
+            hostname = o['HOST_NAME']
+            if hostname.lower() in device.id.lower():  return servername
+        return device.id
     
     def collect(self, device, log):
-        self.siebel = SiebelHandler()
-        self.siebel.initialize(device.zSiebelGateway,device.zSiebelEnterprise,device.zSiebelServer,device.zSiebelUser,device.zSiebelPassword,120,False)
-        components = {}
-        #command = 'list component show CC_ALIAS,CG_ALIAS,CP_DISP_RUN_STATE,CP_START_TIME,CP_END_TIME'
-        command = 'list component show CC_ALIAS,CG_ALIAS,CP_DISP_RUN_STATE'
-        if self.siebel.isServerRunning() == True:
-            components = self.siebel.getCommandOutput(command)
-            #log.debug('output: %s',components)
+        self.startGtwySession(device, log)
+        servername = self.findServerName(device, log)
+        log.debug('found server name %s' % servername)
+        keys = ",".join(KEYMAP.keys())
+        command = 'list component for server %s show %s' % (servername,keys)
+        log.debug("running command: %s" % command)
+        results = []
+        #output = []
+        #if self.siebel.isServerRunning(servername) == True:
+        output = self.siebel.getCommandOutput(command)
+        for o in output:
+            data = dict.fromkeys(KEYMAP.values())
+            for k, v in o.items():
+                data[KEYMAP[k]] = v
+            data['gateway'] = device.zSiebelGateway
+            data['enterprise'] = device.zSiebelEnterprise
+            log.debug("data:%s" % data)
+            results.append(data)
         self.siebel.terminate()
-        
-        return components
- 
+        return results
+    
     def process(self, device, results, log):
         log.info('finding plugin %s for device %s', self.name(), device.id)
         rm = self.relMap()
-        entries = len(results[results.keys()[0]])
-        #log.debug("found %d components",entries)
-        for e in range(entries):
-            info = {}
-            name = results['CC_ALIAS'][e]
-            log.debug("found component: %s",name)
-            if name != 'SiebSrvr':
-                info['id'] = prepId(name)
-                info['CGalias'] = results['CG_ALIAS'][e]
-                info['CCalias'] = results['CC_ALIAS'][e]
-                info['runState'] = results['CP_DISP_RUN_STATE'][e]
-                #info['startTime'] = results['CP_START_TIME'][e]
-                #info['endTime'] = results['CP_END_TIME'][e]
-                om = self.objectMap(info)
-                rm.append(om)
+        for result in results:
+            name = result['cc_alias']
+            if name == 'SiebSrvr': continue
+            om = self.objectMap(result)
+            om.id = prepId(name)
+            if result['cp_disp_run_state'] == 'Shutdown':  om.monitor = False
+            om.setWinservice = om.sv_name
+            rm.append(om)
+            log.info(om)
         return rm

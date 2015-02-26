@@ -74,7 +74,7 @@ class SiebelHandler():
         """
         output = self.execCommand(command)
         data = self.parseOutput(output)
-        log.debug("command: '%s' result:%s" % (command, data))
+        log.debug("Output for command: '%s' is result:%s" % (command, data))
         return data
     
     def execCommand(self,command):
@@ -143,9 +143,12 @@ class SiebelHandler():
     def statDict(self, data=[],keyField=None,valueField=None):
         """ return nagios-style output """
         newDict = {}
+        log.debug("statDict keyfield: %s valuefield: %s on data: %s" % (keyField, valueField, data))
         for d in data:
-            try: newDict[d[keyField]] = d[valueField]
-            except: newDict[d[keyField]] = None
+            if keyField in d.keys(): 
+                newDict[d[keyField]] = d[valueField]
+            #try: newDict[d[keyField]] = d[valueField]
+            #except: newDict[d[keyField]] = None
         return newDict
     
     def isServerRunning(self, server):
@@ -186,3 +189,4 @@ class SiebelHandler():
         command = 'refresh enterprise'
         self.child.sendline(command)
         self.testConnected(False)
+

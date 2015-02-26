@@ -144,7 +144,8 @@ class SiebelHandler():
         """ return nagios-style output """
         newDict = {}
         for d in data:
-            newDict[d[keyField]] = d[valueField]
+            try: newDict[d[keyField]] = d[valueField]
+            except: newDict[d[keyField]] = None
         return newDict
     
     def isServerRunning(self, server):

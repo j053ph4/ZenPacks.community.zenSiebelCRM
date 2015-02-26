@@ -2,6 +2,9 @@ from ZenPacks.community.ConstructionKit.BasicDefinition import *
 from ZenPacks.community.ConstructionKit.Construct import *
 
 
+ROOT = "ZenPacks.community"
+BASE = "zenSiebelCRM"
+VERSION = Version(2, 8, 0)
 
 siebelRunStateMap = {
                4: 'Running',
@@ -9,6 +12,7 @@ siebelRunStateMap = {
                2: 'Unavailable',
                1: 'Stopped',
                0: 'Shutdown',
+               -1: 'Unknown',
                }
 
 def getMapValue(ob, datapoint, map):
@@ -18,17 +22,16 @@ def getMapValue(ob, datapoint, map):
         return map[value]
     except:
         return 'Unknown'
-    
+
 def getSiebelRunState(ob): return ob.getMapValue('status_runState', ob.siebelRunStateMap)
 
 
 SiebelDefinition = type('SiebelDefinition', (BasicDefinition,), {
-        'version' : Version(2, 7, 0),
-        'zenpackbase': "zenSiebelCRM",
+        'version' : VERSION,
+        'zenpackbase': BASE,
         'packZProperties' : [
                             ('zSiebelGateway', 'GATEWAY', 'string'),
                             ('zSiebelEnterprise', 'ENTERPRISE', 'string'),
-                            #('zSiebelServer', 'SERVER', 'string'),
                             ('zSiebelUser', 'USER', 'string'),
                             ('zSiebelPassword', 'PASSWORD', 'password'),
                             ('zSiebelPerfCycleSeconds', 300, 'int'),
@@ -64,7 +67,7 @@ SiebelDefinition = type('SiebelDefinition', (BasicDefinition,), {
 
 
 addDefinitionSelfComponentRelation(SiebelDefinition,
-                          'siebelcomponents', ToMany, 'ZenPacks.community.zenSiebelCRM.SiebelComponent','sv_name',
-                          'winservice',  ToOne, 'Products.ZenModel.WinService', 'pathName',
-                          'Winservice')
+                          'siebelcomponents', ToMany, '%s.%s.%s' % (ROOT, BASE, 'SiebelComponent'),'sv_name',
+                          'winservice',  ToOne, 'Products.ZenModel.WinService', 'serviceName',
+                          'Service', 'serviceName')
 

@@ -6,8 +6,15 @@
 from Products.DataCollector.plugins.CollectorPlugin import PythonPlugin
 from Products.DataCollector.plugins.DataMaps import ObjectMap
 from ZenPacks.community.zenSiebelCRM.Definition import *
-from ZenPacks.community.zenSiebelCRM.SiebelHandler import SiebelHandler
+from ZenPacks.community.zenSiebelCRM.lib.SiebelHandler import SiebelHandler
 from Products.ZenUtils.Utils import zenPath,prepId
+
+__doc__ = """siebelComponentMap
+
+siebelComponentMap detects Siebel CRM software components
+This version adds a relation to associated winservices.
+
+"""
 
                    
 KEYMAP = {
@@ -43,22 +50,19 @@ class siebelComponentMap(PythonPlugin):
         command = 'list servers show SBLSRVR_NAME,HOST_NAME'
         output = self.siebel.getCommandOutput(command)
         for o in output:
-            log.debug("finding server in :%s" % o)
+            #log.debug("finding server in :%s" % o)
             servername = o['SBLSRVR_NAME']
             hostname = o['HOST_NAME']
             if hostname.lower() in device.id.lower():  return servername
         return device.id
     
     def collect(self, device, log):
+        log.info("collecting %s for %s." % (self.name(), device.id))
         self.startGtwySession(device, log)
         servername = self.findServerName(device, log)
-        log.debug('found server name %s' % servername)
         keys = ",".join(KEYMAP.keys())
         command = 'list component for server %s show %s' % (servername,keys)
-        log.debug("running command: %s" % command)
         results = []
-        #output = []
-        #if self.siebel.isServerRunning(servername) == True:
         output = self.siebel.getCommandOutput(command)
         for o in output:
             data = dict.fromkeys(KEYMAP.values())
@@ -66,21 +70,21 @@ class siebelComponentMap(PythonPlugin):
                 data[KEYMAP[k]] = v
             data['gateway'] = device.zSiebelGateway
             data['enterprise'] = device.zSiebelEnterprise
-            log.debug("data:%s" % data)
             results.append(data)
         self.siebel.terminate()
         return results
     
     def process(self, device, results, log):
-        log.info('finding plugin %s for device %s', self.name(), device.id)
+        log.info("The plugin %s returned %s results." % (self.name(), len(results)))
         rm = self.relMap()
         for result in results:
             name = result['cc_alias']
             if name == 'SiebSrvr': continue
+            result.pop('cp_disp_run_state')
             om = self.objectMap(result)
             om.id = prepId(name)
-            if result['cp_disp_run_state'] == 'Shutdown':  om.monitor = False
             om.setWinservice = om.sv_name
             rm.append(om)
-            log.info(om)
+            #log.info(om)
         return rm
+

@@ -1208,138 +1208,30 @@ AVERAGE
 <!-- ('', 'zport', 'dmd', 'Events', 'App', 'Siebel') -->
 <object id='/zport/dmd/Events/App/Siebel' module='Products.ZenEvents.EventClass' class='EventClass'>
 <property type="text" id="transform" mode="w" >
-searchString = "Run State"
-if evt.summary.find(searchString) &gt;= 0:
-	value = evt.summary[evt.summary.find("current value ")+14:len(evt.summary)-1]
-	status = "BLAH"
-	val = int(float(value))
-	if val == -1:
-		evt.severity = 2
-		status = "Unknown"
-	if val == 0:
-		evt.severity = 3
-		status = "Shutdown"
-	if val == 1:
-		evt.severity = 3
-		status = "Unavailable"
-	if val == 2:
-		evt.severity = 4
-		status = "Stopped"
-	if val == 3:
-		evt.severity = 0
-		status = "Online"
-	if val == 4:
-		evt.severity = 0
-		status = "Running"
-	evt.summary = evt.component+" is "+status
+#setPDKey('siebelServiceKey')
+
+sevmap = {
+		   4: {'status': 'Running', 'severity': 0},
+		   3: {'status': 'Online', 'severity': 0},
+		   2: {'status': 'Unavailable', 'severity': 3},
+		   1: {'status': 'Stopped', 'severity': 3},
+		   0: {'status': 'Shutdown', 'severity': 0},
+		   -1: {'status': 'Unknown', 'severity': 2},
+		   }
+
+evcomponent = findEventComponent(device, evt.component)
+
+if evcomponent is not None:
+	if 'Run State' in evt.summary:
+		try:
+			val = int(getMetricValue(evt.summary))
+			entry = sevmap[val]
+			status = entry['status']
+			evt.severity = entry['severity']
+			msg = '%s: %s (%s) is %s' % (evcomponent.sv_name, evcomponent.cc_name, evcomponent.cg_alias, status)
+			evt.summary = msg
+			evt.message = msg
+		except:  pass
 </property>
-</object>
-<!-- ('', 'zport', 'dmd', 'Processes', 'Siebel') -->
-<object id='/zport/dmd/Processes/Siebel' module='Products.ZenModel.OSProcessOrganizer' class='OSProcessOrganizer'>
-<property visible="True" type="boolean" id="zMonitor" >
-False
-</property>
-<tomanycont id='osProcessClasses'>
-<object id='sieblproc.exe' module='Products.ZenModel.OSProcessClass' class='OSProcessClass'>
-<property type="string" id="name" mode="w" >
-sieblproc.exe
-</property>
-<property type="string" id="regex" mode="w" >
-sieblproc.exe
-</property>
-<property type="boolean" id="ignoreParameters" mode="w" >
-False
-</property>
-<property type="int" id="sequence" mode="w" >
-11
-</property>
-<property visible="True" type="boolean" id="ignoreParametersWhenModeling" >
-False
-</property>
-<property visible="True" type="boolean" id="zMonitor" >
-False
-</property>
-</object>
-<object id='siebmtsh.exe' module='Products.ZenModel.OSProcessClass' class='OSProcessClass'>
-<property type="string" id="name" mode="w" >
-siebmtsh.exe
-</property>
-<property type="string" id="regex" mode="w" >
-siebmtsh.exe
-</property>
-<property type="boolean" id="ignoreParameters" mode="w" >
-False
-</property>
-<property type="int" id="sequence" mode="w" >
-12
-</property>
-<property visible="True" type="boolean" id="ignoreParametersWhenModeling" >
-False
-</property>
-<property visible="True" type="boolean" id="zMonitor" >
-False
-</property>
-</object>
-<object id='siebmtshmw.exe' module='Products.ZenModel.OSProcessClass' class='OSProcessClass'>
-<property type="string" id="name" mode="w" >
-siebmtshmw.exe
-</property>
-<property type="string" id="regex" mode="w" >
-siebmtshmw.exe
-</property>
-<property type="boolean" id="ignoreParameters" mode="w" >
-False
-</property>
-<property type="int" id="sequence" mode="w" >
-13
-</property>
-<property visible="True" type="boolean" id="ignoreParametersWhenModeling" >
-False
-</property>
-<property visible="True" type="boolean" id="zMonitor" >
-False
-</property>
-</object>
-<object id='siebprocmw.exe' module='Products.ZenModel.OSProcessClass' class='OSProcessClass'>
-<property type="string" id="name" mode="w" >
-siebprocmw.exe
-</property>
-<property type="string" id="regex" mode="w" >
-siebprocmw.exe
-</property>
-<property type="boolean" id="ignoreParameters" mode="w" >
-False
-</property>
-<property type="int" id="sequence" mode="w" >
-14
-</property>
-<property visible="True" type="boolean" id="ignoreParametersWhenModeling" >
-False
-</property>
-<property visible="True" type="boolean" id="zMonitor" >
-False
-</property>
-</object>
-<object id='siebsvc.exe' module='Products.ZenModel.OSProcessClass' class='OSProcessClass'>
-<property type="string" id="name" mode="w" >
-siebsvc.exe
-</property>
-<property type="string" id="regex" mode="w" >
-siebsvc.exe
-</property>
-<property type="boolean" id="ignoreParameters" mode="w" >
-False
-</property>
-<property type="int" id="sequence" mode="w" >
-15
-</property>
-<property visible="True" type="boolean" id="ignoreParametersWhenModeling" >
-False
-</property>
-<property visible="True" type="boolean" id="zMonitor" >
-False
-</property>
-</object>
-</tomanycont>
 </object>
 </objects>

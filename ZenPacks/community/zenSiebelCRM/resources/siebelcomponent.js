@@ -9,7 +9,11 @@
             return ob;
         }
     }
-
+    
+    function pass_link(ob){ 
+        return ob; 
+    }
+    
     ZC.SiebelComponentPanel = Ext.extend(ZC.ComponentGridPanel, {
         constructor: function(config) {
             config = Ext.applyIf(config||{}, {
@@ -83,58 +87,66 @@
                         "dataIndex": "name"
                     }, 
                     {
-                        "header": "CC Name", 
-                        "width": 120, 
                         "sortable": "true", 
+                        "width": 120, 
+                        "header": "CC Name", 
+                        "renderer": "pass_link", 
                         "id": "cc_name", 
                         "dataIndex": "cc_name"
                     }, 
                     {
-                        "header": "CC Run Mode", 
-                        "width": 120, 
                         "sortable": "true", 
+                        "width": 120, 
+                        "header": "CC Run Mode", 
+                        "renderer": "pass_link", 
                         "id": "cc_runmode", 
                         "dataIndex": "cc_runmode"
                     }, 
                     {
-                        "header": "CG Alias", 
-                        "width": 120, 
                         "sortable": "true", 
+                        "width": 120, 
+                        "header": "CG Alias", 
+                        "renderer": "pass_link", 
                         "id": "cg_alias", 
                         "dataIndex": "cg_alias"
                     }, 
                     {
-                        "header": "CP Start Mode", 
-                        "width": 120, 
                         "sortable": "true", 
+                        "width": 120, 
+                        "header": "CP Start Mode", 
+                        "renderer": "pass_link", 
                         "id": "cp_startmode", 
                         "dataIndex": "cp_startmode"
                     }, 
                     {
-                        "header": "CT Alias", 
-                        "width": 120, 
                         "sortable": "true", 
+                        "width": 120, 
+                        "header": "CT Alias", 
+                        "renderer": "pass_link", 
                         "id": "ct_alias", 
                         "dataIndex": "ct_alias"
                     }, 
                     {
-                        "header": "Run State", 
-                        "width": 120, 
                         "sortable": "true", 
+                        "width": 120, 
+                        "header": "Run State", 
+                        "renderer": "pass_link", 
                         "id": "getSiebelRunState", 
                         "dataIndex": "getSiebelRunState"
                     }, 
                     {
-                        "header": "Winservice", 
-                        "width": 120, 
                         "sortable": "true", 
+                        "width": 120, 
+                        "header": "Service", 
+                        "renderer": "pass_link", 
                         "id": "getWinserviceLink", 
                         "dataIndex": "getWinserviceLink"
                     }, 
                     {
-                        "header": "Server", 
-                        "width": 120, 
                         "sortable": "true", 
+                        "width": 120, 
+                        "header": "Server", 
+                        "renderer": "pass_link", 
                         "id": "sv_name", 
                         "dataIndex": "sv_name"
                     }, 

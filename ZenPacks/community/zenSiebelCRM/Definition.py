@@ -4,7 +4,7 @@ from ZenPacks.community.ConstructionKit.Construct import *
 
 ROOT = "ZenPacks.community"
 BASE = "zenSiebelCRM"
-VERSION = Version(2, 8, 1)
+VERSION = Version(2, 8, 0)
 
 siebelRunStateMap = {
                4: 'Running',

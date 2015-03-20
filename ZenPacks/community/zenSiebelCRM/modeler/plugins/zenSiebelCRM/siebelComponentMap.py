@@ -4,7 +4,7 @@
 #
 ######################################################################
 from Products.DataCollector.plugins.CollectorPlugin import PythonPlugin
-from Products.DataCollector.plugins.DataMaps import ObjectMap
+from Products.DataCollector.plugins.DataMaps import ObjectMap, MultiArgs
 from ZenPacks.community.zenSiebelCRM.Definition import *
 from ZenPacks.community.zenSiebelCRM.lib.SiebelHandler import SiebelHandler
 from Products.ZenUtils.Utils import zenPath,prepId
@@ -47,21 +47,22 @@ class siebelComponentMap(PythonPlugin):
 
     def findServerName(self, device, log):
         '''find server name variable'''
-        command = 'list servers show SBLSRVR_NAME,HOST_NAME'
+        command = 'list servers show SBLSRVR_NAME,HOST_NAME,SBLSRVR_STATUS'
         output = self.siebel.getCommandOutput(command)
         for o in output:
             #log.debug("finding server in :%s" % o)
             servername = o['SBLSRVR_NAME']
             hostname = o['HOST_NAME']
-            if hostname.lower() in device.id.lower():  return servername
-        return device.id
+            version = o['SBLSRVR_STATUS']
+            if hostname.lower() in device.id.lower():  return servername, version
+        return device.id, 'Unknown'
     
     def collect(self, device, log):
         log.info("collecting %s for %s." % (self.name(), device.id))
         self.startGtwySession(device, log)
-        servername = self.findServerName(device, log)
+        servername, version = self.findServerName(device, log)
         keys = ",".join(KEYMAP.keys())
-        command = 'list component for server %s show %s' % (servername,keys)
+        command = 'list component for server %s show %s' % (servername, keys)
         results = []
         output = self.siebel.getCommandOutput(command)
         for o in output:
@@ -70,6 +71,7 @@ class siebelComponentMap(PythonPlugin):
                 data[KEYMAP[k]] = v
             data['gateway'] = device.zSiebelGateway
             data['enterprise'] = device.zSiebelEnterprise
+            data['version'] = version
             results.append(data)
         self.siebel.terminate()
         return results
@@ -79,11 +81,14 @@ class siebelComponentMap(PythonPlugin):
         rm = self.relMap()
         for result in results:
             name = result['cc_alias']
+            version = result['version']
             if name == 'SiebSrvr': continue
             result.pop('cp_disp_run_state')
+            result.pop('version')
             om = self.objectMap(result)
             om.id = prepId(name)
             om.setWinservice = om.sv_name
+            om.setProductKey = MultiArgs('Siebel Server %s' % version, 'Oracle')
             rm.append(om)
             #log.info(om)
         return rm
